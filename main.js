@@ -1,12 +1,15 @@
 require("./include.js");
 
-Util.debug("Attempting DB Connection : " + config.dbpassword);
-database.connect( config.dbpassword );
-
 async.waterfall([
     function(callback) {
-      room.loadRooms();
+      Util.info("Attempting DB Connection");
+      database.connect( config.dbpassword);
       callback(null);
+    },
+    function(callback) {
+      setTimeout( function() { 
+      Room.loadRooms();
+      callback(null); }, 1500);
     },
     function(callback) {
       Util.info("Recovering copyover details");
@@ -15,7 +18,9 @@ async.waterfall([
     },
     function(callback) {
       server.listen(listenport);
+      callback(null);
     }
+
 ], function(err, result) {
   Util.info("Server loaded.");
 });

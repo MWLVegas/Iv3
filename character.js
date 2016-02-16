@@ -7,7 +7,7 @@ module.exports = function character(socket) {
   this.sock = socket;
   this.id = socket.id.toString();//.substring(2);
   this.state = 0;
-  this.room = 1;
+  this.room = -1;
   this.pass = "";
 
   this.inventory;
@@ -24,3 +24,9 @@ module.exports = function character(socket) {
 
 }
 
+var removePlayer = function( character ) {
+  Room.removeFromRoom( player[character.id] );
+}
+
+
+module.exports.removePlayer = removePlayer;

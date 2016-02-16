@@ -1,6 +1,6 @@
 GLOBAL.app = require('express')();
 GLOBAL.http = require('http').Server(app);
-GLOBAL.sio = require('socket.io')(http);
+GLOBAL.hio = require('socket.io')(http);
 GLOBAL.sockets = [];
 GLOBAL.player = [];
 
@@ -16,19 +16,17 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/iv3.html');
 });
 
-setTimeout( function() {
 
+setTimeout( function() {
   http.listen( port, function(){
     Util.info('listening on *:'+port);
-  });
-}, 1500);
+  }); }, 2000);
 
-
-sio.on('connection', function(socket) {
+hio.on('connection', function(socket) {
   if ( copyoverdat.size != 0 )
   {
-  Util.debug("Requesting copyover info.");
-  socket.emit('copyoverlogin','');
+    Util.debug("Requesting copyover info.");
+    socket.emit('copyoverlogin','');
   }
   player[socket.id] = new character(socket);
   socket.emit('info',config.greeting.color(true));
@@ -60,7 +58,17 @@ sio.on('connection', function(socket) {
   });
 
   socket.on('copyoverlogin', function(data) {
-    var info = JSON.parse(data);
+    var info;
+    try {
+      info = (data);
+    }
+    catch (e) {
+      Util.info("Error reading JSON info: " + JSON.stringify(data));
+      return;
+    }
+
+    data = JSON.stringify(data);
+
     Util.info("Copyover Login received: " + data);
     if ( copyoverdat[info.id] )
     {
@@ -72,7 +80,7 @@ sio.on('connection', function(socket) {
         save.loadPlayer( player[socket.id] );
         Util.msgall(player[socket.id].name + " has reconnected!", null, "chat");
         socket.emit('copyoversuccess', player[socket.id].name);
-        io.state(socket,4);
+        sio.state(socket,4);
         delete copyoverdat[info.id];
         return;
       }
@@ -136,7 +144,7 @@ sio.on('connection', function(socket) {
             Util.cmd(socket,"newpass", "");
             player[socket.id].name = msg.cap();
             Util.info("New character: " + player[socket.id].name);
-            io.state(socket, 3);
+            sio.state(socket, 3);
           });
       return;
     }
@@ -187,7 +195,7 @@ sio.on('connection', function(socket) {
       socket.emit('loggedin', player[socket.id].dec );
 
       Util.msgall(player[socket.id].name + " has begun adventuring on Ivalice!", null, "chat");
-      setTimeout(function() { io.state(socket,4) },10);
+      setTimeout(function() { sio.state(socket,4) },10);
     });
   });
 
@@ -222,7 +230,7 @@ sio.on('connection', function(socket) {
         save.loadPlayer( player[socket.id] );
         Util.msgall(player[socket.id].name + " has connected!", null, "chat");
         socket.emit('loggedin', player[socket.id].dec);
-        io.state(socket,4);
+        sio.state(socket,4);
       }
       else {
         Util.msg(socket,"Invalid password. Try again. Enter 'cancel' to go back to character selection.");
@@ -252,7 +260,7 @@ sio.on('connection', function(socket) {
   });
 
   socket.on('info', function(msg) {
-    sio.emit('info',msg);
+    hio.emit('info',msg);
   });
 
 });

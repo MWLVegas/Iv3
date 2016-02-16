@@ -38,7 +38,11 @@ var loadPlayer = function( character ) {
       player[character.id].sock = socket;
       player[character.id].name = name;
       player[character.id].id = id;
-      player[character.id].state = state
+      player[character.id].state = state;
+
+      var room = player[character.id].room;
+      player[character.id].room = -1;
+      Room.playerToRoom(player[character.id], room);
     }
 
   });

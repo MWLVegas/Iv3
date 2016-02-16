@@ -4,6 +4,17 @@ String.prototype.cap = function() {
 
 module.exports = {
 
+  msgroom: function ( vnum, msg, plr ) {
+    Util.debug("Room Msg: " + vnum);
+    Util.debug("Messaging Room : " + vnum + " : " + rooms[vnum].name);
+    for ( var x in player )
+    {
+      if ( plr != null && player[x].name == plr )
+        continue;
+
+      Util.msg(player[x].sock,msg);
+    }
+  },
   announce: function( socket ) {
 
     readfile("announcement.txt", "utf8", function(err,buffer) {

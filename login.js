@@ -17,7 +17,7 @@ module.exports = {
           Util.debug("no char found");
           socket.emit("clear","");
           socket.emit("login","Character not found. Try 'new' to begin.");
-          io.state(socket,0);
+          sio.state(socket,0);
 
           return;
         }
@@ -26,7 +26,7 @@ module.exports = {
           socket.emit("login", "Enter your password:");
           player[socket.id].pass = rows[i].passwd;
           player[socket.id].name = rows[i].name;
-          io.state(socket,1);
+          sio.state(socket,1);
         }
 
       });

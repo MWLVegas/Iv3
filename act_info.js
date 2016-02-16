@@ -20,5 +20,35 @@ var doWho = function(socket,msg) {
 
 };
 
-module.exports.doWho = doWho;
+var doLook = function(socket,msg) { 
 
+  Util.debug("Player looking in room " + player[socket.id].room);
+
+  var room = rooms[player[socket.id].room];
+
+  var exits = false;
+  var info = "" + room.name + "[" + room.vnum + "] <br />" + 
+    room.desc + " <br /> <br />" + 
+    "[Exits:" ;
+  for ( var x in room.exits )
+  {
+    if ( !exits ) 
+      exits = true;
+    info = info + " " + x;
+  }
+  if ( !exits )
+    info = info + " none!";
+
+  info = info + "]<br /><br />";
+
+  for ( var x in room.players )
+  {
+    Util.debug("Players: " + x);
+    info = info + "    "+ player[x].name + " is here. <br />";
+  }
+
+  Util.msg(socket,info);
+};
+
+module.exports.doWho = doWho;
+module.exports.doLook = doLook;

@@ -52,6 +52,8 @@ var doSay = function (socket, msg) {
 };
 
 var doQuit = function (socket, msg) {
+
+  character.removePlayer( player[socket.id] );
   socket.emit("disconnect","Goodbye!");
   socket.disconnect();
 };
@@ -88,6 +90,7 @@ var doReboot = function(socket) {
         {
           var sock = player[x].sock;
           save.savePlayer( player[x]);
+          character.removePlayer( player[socket.id] );
           socket.emit("info", "<img src='http://kefka.redcrown.net/images/fmv/disex.png'><br />");
           socket.emit("info", "##0AFThe bright flash of the Light of Judgement covers the land!".color());
         }
@@ -95,7 +98,7 @@ var doReboot = function(socket) {
       }], function(err, results ) {
         Util.info("Save complete.");
         setTimeout( function(){ 
-          process.exit(); }, 1500);
+          process.exit(); }, 500);
       });
 
 }
@@ -133,13 +136,17 @@ function loadFunctions() {
     createCommand("ooc", doOoc);
     createCommand("gossip", doGossip);
 
+    createCommand("look", act_info.doLook);
     createCommand("who", act_info.doWho);
     createCommand("quit", doQuit);
 
     createCommand("copyover", act_wiz.doCopyover,500);
+    createCommand("asave", act_wiz.doAsave,500);
     createCommand("reboot", doReboot,500);
     createCommand("socket", doSocket, 500);
     createCommand("push", doPush, 500);
+
+    createCommand("olc", olc.doOlc, 500);
 
     createCommand("save", doSave);
 

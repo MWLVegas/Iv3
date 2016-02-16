@@ -7,17 +7,18 @@ GLOBAL.async = require('async');
 GLOBAL.fs = require('fs');
 var striptags = require('striptags');
 
-GLOBAL.room = require('./room.js');
+GLOBAL.Room = require('./room.js');
 GLOBAL.login = require('./login.js');
 GLOBAL.Util = require('./util.js');
 GLOBAL.database = require('./database.js');
-GLOBAL.io = require('./socket.js');
+GLOBAL.sio = require('./socket.js');
 GLOBAL.functions = require('./functions.js');
 GLOBAL.character = require('./character.js');
 GLOBAL.config = require('./config.js');
 GLOBAL.save = require('./save.js');
 
 GLOBAL.act_wiz = require('./act_wiz.js');
+GLOBAL.olc = require('./olc.js');
 
 String.prototype.cap = function() {
   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);

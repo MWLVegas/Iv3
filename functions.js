@@ -18,9 +18,8 @@ var checkCommand = function(data, socket)
     cmd = data.trim().toLowerCase();
   else
   {
-    cmd = data.substring(0,data.indexOf(" "))
+    cmd = data.substring(0,data.indexOf(" ").toLowerCase())
   }
-
     data = data.substring(cmd.length).trim();
 
   if ( commandList[cmd] )
@@ -30,11 +29,9 @@ var checkCommand = function(data, socket)
       Util.msg(socket,invalid);
       return;
     }
-
     commandList[cmd].funct(socket, data);
     return;
   }
-
   Util.msg(socket,invalid);
 }
 

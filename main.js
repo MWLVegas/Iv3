@@ -4,6 +4,7 @@ Util.debug("Attempting DB Connection : " + config.dbpassword);
 database.connect( config.dbpassword );
 
 setTimeout( function() {
+  room.loadRooms();
 
 server.listen( listenport );
 }, 1200);

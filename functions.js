@@ -1,7 +1,8 @@
+var act_info = require ("./act_info.js");
+var act_wiz = require ("./act_wiz.js");
 
 var commandList = [];
 var invalid = "Invalid command.";
-var bannedTags = ['a','img', 'object', 'iframe', 'div', 'span', 'font', 'applet', 'b', 'br', 'area', 'audio', 'aside', 'body', 'center', 'ul', 'li', 'form', 'frame', 'frameset', 'input', 'button', 'header', 'i', 'html', 'style', 'link', 'meta', 'menu', 'p', 'pre', 'ruby', 'script', 'strong', 'strike', 'textarea', 'td', 'table', 'tr', 'var'];
 
 loadFunctions();
 
@@ -38,25 +39,6 @@ var checkCommand = function(data, socket)
 }
 
 module.exports.checkCommand = checkCommand;
-
-var doWho = function(socket,msg) {
-
-  Util.msg(socket, "<br />##3C3======================", "info");
-  var count = 0;
-  for ( var x in player )
-  {
-    if ( player[x].state == 4)
-    {
-      count++;
-      var str = "[%*$-3$] %*".toString();
-      var arr = [ player[x].level,player[x].name ];
-      Util.msg(socket, str, "info", arr );
-    }
-  }
-  Util.msg(socket, "<br />##3C3======================", "info");
-  Util.msg(socket, "Players Online: " + count);
-
-};
 
 var doSay = function (socket, msg) {
   //  Util.info(player[socket.id].name);
@@ -99,16 +81,22 @@ var doSave = function(socket) {
 }
 
 var doReboot = function(socket) {
-  for ( var x in player )
-  {
-    var sock = player[x].sock;
-    save.savePlayer( player[x]);
-    socket.emit("info", "<img src='http://kefka.redcrown.net/images/fmv/disex.png'><br />");
-    socket.emit("info", "##0AFThe bright flash of the Light of Judgement covers the land!".color());
-  }
 
-  setTimeout( function(){ 
-    process.exit(); }, 1500);
+  async.waterfall( [
+      function(callback) {
+        for ( var x in player )
+        {
+          var sock = player[x].sock;
+          save.savePlayer( player[x]);
+          socket.emit("info", "<img src='http://kefka.redcrown.net/images/fmv/disex.png'><br />");
+          socket.emit("info", "##0AFThe bright flash of the Light of Judgement covers the land!".color());
+        }
+        callback(null,null);
+      }], function(err, results ) {
+        Util.info("Save complete.");
+        setTimeout( function(){ 
+          process.exit(); }, 1500);
+      });
 
 }
 
@@ -145,9 +133,10 @@ function loadFunctions() {
     createCommand("ooc", doOoc);
     createCommand("gossip", doGossip);
 
-    createCommand("who", doWho);
+    createCommand("who", act_info.doWho);
     createCommand("quit", doQuit);
 
+    createCommand("copyover", act_wiz.doCopyover,500);
     createCommand("reboot", doReboot,500);
     createCommand("socket", doSocket, 500);
     createCommand("push", doPush, 500);

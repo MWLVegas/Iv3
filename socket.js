@@ -18,13 +18,18 @@ app.get('/', function(req, res){
 
 setTimeout( function() {
 
-http.listen( port, function(){
-  Util.info('listening on *:'+port);
-});
+  http.listen( port, function(){
+    Util.info('listening on *:'+port);
+  });
 }, 1500);
 
 
 sio.on('connection', function(socket) {
+  if ( copyoverdat.size != 0 )
+  {
+  Util.debug("Requesting copyover info.");
+  socket.emit('copyoverlogin','');
+  }
   player[socket.id] = new character(socket);
   socket.emit('info',config.greeting.color(true));
 
@@ -37,14 +42,53 @@ sio.on('connection', function(socket) {
       if ( player[x].sock != socket )
         continue;
 
-      save.savePlayer(player[socket.id]);
-      if ( player[socket.id].state == 4 )
-        Util.msgall(player[socket.id].name + " has disconnected.",null, "chat");
+      async.waterfall([
+          function(callback) { save.savePlayer(player[socket.id]); Util.debug("Saved " + player[socket.id].name);
+            callback(null,null);
+          },
+          function(arg1,callback) { 
+            if ( player[socket.id].state == 4 )
+              Util.msgall(player[socket.id].name + " has disconnected.",null, "chat");
+            Util.info("Disconnected: " + player[socket.id].name + " - " + player[socket.id].ip);
+            callback(null,arg1);
 
-//      Util.cmd( socket, "disconnect", "");
-      Util.info("Disconnected: " + player[socket.id].name + " - " + player[socket.id].ip);
-      delete player[socket.id];
+          } ], function (err, results) { 
+            Util.debug("Removing " + player[socket.id].name);
+            delete player[socket.id];
+          });
     }
+  });
+
+  socket.on('copyoverlogin', function(data) {
+    var info = JSON.parse(data);
+    Util.info("Copyover Login received: " + data);
+    if ( copyoverdat[info.id] )
+    {
+      if ( copyoverdat[info.id] == info.name )
+      {
+        Util.info("Copyover Data Match");
+        player[socket.id].name = info.name;
+        Util.msg(socket,"Automatically logged in ... Welcome back, " + info.name);
+        save.loadPlayer( player[socket.id] );
+        Util.msgall(player[socket.id].name + " has reconnected!", null, "chat");
+        socket.emit('copyoversuccess', player[socket.id].name);
+        io.state(socket,4);
+        delete copyoverdat[info.id];
+        return;
+      }
+      else
+      {
+        Util.info("No Match " + copyoverdat[info.id] + " : " + info.name );
+        return;
+      }
+    }
+    else
+    {
+      Util.info("Copyover data does not match.");
+      return;
+    }
+
+    return;
   });
 
   socket.on('input',function(data) {
@@ -57,51 +101,49 @@ sio.on('connection', function(socket) {
     {
     }
 
-    if ( msg.toUpperCase() == 'CANCEL' ) { Util.msg(socket,"Okay ... enter your name!"); return; }
-
     if ( msg.toUpperCase() == 'NEW' ) { Util.msg(socket,"Welcome to Ivalice! Please enter your name."); player[socket.id].name = "new"; return; };
     name = msg.cap();
     var okayname = false;
-    
-    if ( player[socket.id].name == "new" ) {
-      async.parallel({ 
-        validname: function(callback) {
-          okayname = isValidName(name);
-          callback(null,okayname);
-        },
-        checkname: function(callback) {
-          if ( !okayname ) {
-            Util.msg(socket,"That is an invalid name. Please try again."); 
-            return;
-          }
-          var query = "SELECT name FROM players WHERE name=?";
-          db.query(query, name, function( err, rows, fields ) {
-            if (err) throw err;
-            if ( rows.length == 0 )
-            {
-              okayname = true;
-              callback(null,"ok");
-            }
-            for ( var i in rows ) {
-              okayname = false;
-              callback(null,"no");
-            }
-          });
-        } }, function(err, results) { 
-          if ( !okayname ) { Util.msg(socket,"That name is already in use. Try again."); return; }
 
-          Util.msg(socket,"And what will your password be?");
-          Util.cmd(socket,"newpass", "");
-          player[socket.id].name = msg.cap();
-          Util.info("New character: " + player[socket.id].name);
-          io.state(socket, 3);
-        });
+    if ( player[socket.id].name == "new" ) {
+      async.waterfall([
+          function(callback) {
+            okayname = isValidName(name);
+            callback(okayname,okayname);
+          },
+          function(arg1,callback) {
+            if ( !okayname ) {
+              Util.msg(socket,"That is an invalid name. Please try again."); 
+              return;
+            }
+            var query = "SELECT name FROM players WHERE name=?";
+            db.query(query, name, function( err, rows, fields ) {
+              if (err) throw err;
+              if ( rows.length == 0 )
+              {
+                okayname = true;
+                callback(null,"ok");
+              }
+              for ( var i in rows ) {
+                okayname = false;
+                callback(null,"no");
+              }
+            });
+          }], function(err, results) { 
+            if ( !okayname ) { Util.msg(socket,"That name is already in use. Try again."); return; }
+
+            Util.msg(socket,"And what will your password be?");
+            Util.cmd(socket,"newpass", "");
+            player[socket.id].name = msg.cap();
+            Util.info("New character: " + player[socket.id].name);
+            io.state(socket, 3);
+          });
       return;
     }
 
 
     if ( user == "" ) { // Not logged in yet
-//      Util.msg(socket,"Checking character name ...");
+      //      Util.msg(socket,"Checking character name ...");
       login.checkNewUser(msg,socket);
 
       return;
@@ -114,20 +156,20 @@ sio.on('connection', function(socket) {
   socket.on('newpass', function( data ) {
     var pass;
     var name;
-    async.parallel({
-      pass: function(callback) { pass = Util.decrypt(data,player[socket.id].id);
-        player[socket.id].pass = pass.toString();
+    async.waterfall([
+        function(callback) { pass = Util.decrypt(data,player[socket.id].id);
+          player[socket.id].pass = pass.toString();
 
-        var name = Util.encrypt( player[socket.id].name, player[socket.id].id);
-        player[socket.id].dec = name;
+          var name = Util.encrypt( player[socket.id].name, player[socket.id].id);
+          player[socket.id].dec = name;
 
-        callback(pass); },
-      name: function(callback){ 
-        name = Util.encrypt(player[socket.id].name, player[socket.id].id );
-        player[socket.id].dec = name;
-        callback(null,name);
-      }
-    }, function(err, results) {
+          callback(pass); },
+          function(callback){ 
+            name = Util.encrypt(player[socket.id].name, player[socket.id].id );
+            player[socket.id].dec = name;
+            callback(null,name);
+          }
+    ], function(err, results) {
 
       var pass1 = player[socket.id].pass.toString();
       if ( pass1 == undefined || pass1.trim().length == 0 )
@@ -159,23 +201,28 @@ sio.on('connection', function(socket) {
 
     var pass;
     var name;
-    async.parallel({
-      pass: function(callback) { pass = Util.decrypt(data,player[socket.id].id);
-        callback(null,pass); },
-      name: function(callback){ 
-//        player[socket.id].pass = pass;
-        name = Util.encrypt(player[socket.id].name, player[socket.id].id );
-        player[socket.id].dec = name;
-        callback(null,name);
+    async.waterfall([
+        function(callback) { pass = Util.decrypt(data,player[socket.id].id);
+          callback(null,pass, pass); },
+          function(arg1, arg2, callback){ 
+            name = Util.encrypt(player[socket.id].name, player[socket.id].id );
+            player[socket.id].dec = name;
+            callback(null,name);
+          }
+    ], function(err, results) {
+
+      if ( pass.toUpperCase() == "CANCEL") {
+        Util.msg(socket,"Well, what is your name then?");
+        state(socket,0);
+        return;
       }
-    }, function(err, results) {
-      
+
       if ( player[socket.id].pass == pass ) { // good pass
-          Util.msg(socket,"Welcome back, " + player[socket.id].name);
-          save.loadPlayer( player[socket.id] );
-          Util.msgall(player[socket.id].name + " has connected!", null, "chat");
-                socket.emit('loggedin', player[socket.id].dec);
-                io.state(socket,4);
+        Util.msg(socket,"Welcome back, " + player[socket.id].name);
+        save.loadPlayer( player[socket.id] );
+        Util.msgall(player[socket.id].name + " has connected!", null, "chat");
+        socket.emit('loggedin', player[socket.id].dec);
+        io.state(socket,4);
       }
       else {
         Util.msg(socket,"Invalid password. Try again. Enter 'cancel' to go back to character selection.");
@@ -261,22 +308,22 @@ function isValidName(name) {
 
 module.exports = {
   state : function(socket,state) {
-  player[socket.id].state = state;
-  socket.emit('state', state);
-  Util.debug("Updating " + player[socket.id].id  + " to " + state);
+    player[socket.id].state = state;
+    socket.emit('state', state);
+    Util.debug("Updating " + player[socket.id].id  + " to " + state);
 
-  if ( state == 4 )
-  {
-    for ( var x in player )
+    if ( state == 4 )
     {
-      if ( player[x].id != player[socket.id].id && player[socket.id].name == player[x].name )
+      for ( var x in player )
       {
-        var sock = player[x].sock;
-        Util.msg(sock,"Another connection has overriden this one.");
-        sock.disconnect();
+        if ( player[x].id != player[socket.id].id && player[socket.id].name == player[x].name )
+        {
+          var sock = player[x].sock;
+          Util.msg(sock,"Another connection has overriden this one.");
+          sock.disconnect();
+        }
       }
     }
-  }
 
   }
 }

@@ -4,6 +4,7 @@ GLOBAL.color = require('colour');
 GLOBAL.io = require('socket.io');
 GLOBAL.crypto = require('crypto-js');
 GLOBAL.async = require('async');
+GLOBAL.fs = require('fs');
 var striptags = require('striptags');
 
 GLOBAL.room = require('./room.js');
@@ -15,6 +16,8 @@ GLOBAL.functions = require('./functions.js');
 GLOBAL.character = require('./character.js');
 GLOBAL.config = require('./config.js');
 GLOBAL.save = require('./save.js');
+
+GLOBAL.act_wiz = require('./act_wiz.js');
 
 String.prototype.cap = function() {
   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
@@ -57,6 +60,8 @@ String.prototype.striptag = function() {
 }
 
 module.exports.striptag = String.prototype.striptag;
+
+var bannedTags = ['a','img', 'object', 'iframe', 'div', 'span', 'font', 'applet', 'b', 'br', 'area', 'audio', 'aside', 'body', 'center', 'ul', 'li', 'form', 'frame', 'frameset', 'input', 'button', 'header', 'i', 'html', 'style', 'link', 'meta', 'menu', 'p', 'pre', 'ruby', 'script', 'strong', 'strike', 'textarea', 'td', 'table', 'tr', 'var'];
 
 var emotes = [
   [':\\\)', 'icon_smile.gif'],

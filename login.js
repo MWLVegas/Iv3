@@ -22,7 +22,7 @@ module.exports = {
           return;
         }
         for ( var i in rows ) {
-          Util.debug("Character found. Requesting password: " + rows[i].passwd + " with ID " + player[socket.id].id.toString() );
+          Util.debug("Character found. Requesting password with ID " + player[socket.id].id.toString() );
           socket.emit("login", "Enter your password:");
           player[socket.id].pass = rows[i].passwd;
           player[socket.id].name = rows[i].name;

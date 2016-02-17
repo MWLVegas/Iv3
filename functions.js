@@ -2,9 +2,11 @@ var act_info = require ("./act_info.js");
 var act_wiz = require ("./act_wiz.js");
 
 var commandList = [];
+var aliasList = [];
 var invalid = "Invalid command.";
 
 loadFunctions();
+loadAliases();
 
 var checkCommand = function(data, socket)
 {
@@ -35,6 +37,12 @@ var checkCommand = function(data, socket)
     commandList[cmd].funct(socket, data);
     return;
   }
+  if ( aliasList[cmd] )
+  {
+    checkCommand(aliasList[cmd].alias + " " + data, socket);
+    return;
+  }
+
   Util.msg(socket,invalid);
 }
 
@@ -126,6 +134,14 @@ var doPush = function( socket, msg )
 }
 
 
+function loadAliases() {
+  setTimeout( function() {
+    createAlias("l", "look");
+    createAlias("oco", "ooc");
+    createAlias("gos", "gossip");
+  },1000);
+
+}
 
 function loadFunctions() {
   // Command table
@@ -156,6 +172,9 @@ function loadFunctions() {
   Util.info(commandList);
 }
 
+function createAlias(name,alias) {
+  aliasList[name] = {name: name, alias: alias };
+}
 
 function createCommand(name, func, level) {
   if ( level == undefined )

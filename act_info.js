@@ -21,9 +21,6 @@ var doWho = function(socket,msg) {
 };
 
 var doLook = function(socket,msg) { 
-
-  Util.debug("Player looking in room " + player[socket.id].room);
-
   var room = rooms[player[socket.id].room];
 
   var exits = false;
@@ -43,7 +40,6 @@ var doLook = function(socket,msg) {
 
   for ( var x in room.players )
   {
-    Util.debug("Players: " + x);
     info = info + "    "+ player[x].name + " is here. <br />";
   }
 

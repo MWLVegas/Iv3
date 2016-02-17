@@ -16,8 +16,6 @@ var saveRoom = function(room) {
   Util.debug("Room.saveRoom: " + room);
   var r = rooms[room];
 
-  Util.debug("Room Info: " + r);
-
   delete  r.people;
   delete r.mobs;
 
@@ -86,7 +84,6 @@ var playerToRoom = function(plr, room) {
   rooms[room].players[plr.id] = plr.name;
   player[plr.id].room = room;
   Util.msgroom( room, player[plr.id].name + " has arrived.", player[plr.id].name);
-  Util.debug("Player added to room " + room);
 };
 
 var playerFromRoom = function(plr) {

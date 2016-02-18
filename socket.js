@@ -40,7 +40,7 @@ hio.on('connection', function(socket) {
         continue;
 
       async.waterfall([
-          function(callback) { save.savePlayer(player[socket.id]); Util.debug("Saved " + player[socket.id].name);
+          function(callback) { save.savePlayer(player[socket.id]); 
             callback(null,callback);
           },
           function(arg1,callback) { 
@@ -50,7 +50,7 @@ hio.on('connection', function(socket) {
             callback(null,callback);
 
           } ], function (err, results) { 
-            Util.debug("Removing " + player[socket.id].name);
+            //Util.debug("Removing " + player[socket.id].name);
             delete player[socket.id];
           });
     }

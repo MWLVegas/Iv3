@@ -1,5 +1,3 @@
-var Util = require('./util.js');
-
 
 var doWho = function(socket,msg) {
 
@@ -59,5 +57,32 @@ var doLook = function(socket,msg) {
   Util.msg(socket,info);
 };
 
+var doWhois = function(socket,msg) {
+
+  var name = msg.firstWord();
+
+  var query = "SELECT logoff FROM players WHERE name=?;";
+  db.query(query, [ name ], function (err, rows, field) {
+    if (err) throw err;
+    if ( rows.length == 0 )
+    {
+      Util.msg("That player was not found.");
+      return;
+    }
+    for ( var i in rows ) {
+      var stamp = rows[i].logoff;
+      var logoff = new Date(stamp);
+      var curr = moment() / 1000;
+
+      var remainingDate = moment(curr).diff(logoff);
+//      var inp = moment.seconds(remainingDate).format("D H m s");
+      Util.msg(socket,name.cap() + " was last seen " + remainingDate.lengthFormat() + " ago.");
+        return;
+
+      }
+  });
+}
+
 module.exports.doWho = doWho;
 module.exports.doLook = doLook;
+module.exports.doWhois = doWhois;

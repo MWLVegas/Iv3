@@ -25,7 +25,7 @@ module.exports = function character(socket) {
 }
 
 var removePlayer = function( character ) {
-  Room.removeFromRoom( player[character.id] );
+  Room.playerFromRoom( player[character.id] );
 }
 
 

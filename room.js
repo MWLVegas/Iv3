@@ -1,7 +1,7 @@
 GLOBAL.rooms = [];
 
-var newRoom = function() {
-  this.vnum = 0;
+var newRoom = function(vnum) {
+  this.vnum = vnum;
   this.name = "";
   this.area = "Void";
   this.desc = "";
@@ -21,8 +21,8 @@ var saveRoom = function(room) {
 
   var json = JSON.stringify(r);
 
-  var query = "UPDATE rooms SET room=? WHERE vnum=?;";
-  db.query(query, [json, room]);
+  var query = "INSERT INTO rooms (vnum, name, area, room) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE room=?;";
+  db.query(query, [room, r.name, r.area, json, json, room]);
 };
 
 var loadRoom = function(vnum) {
@@ -36,7 +36,7 @@ var loadRoom = function(vnum) {
     }
     for ( var i in rows ) {
 
-      rooms[vnum] = new newRoom();
+      rooms[vnum] = new newRoom(vnum);
       rooms[vnum].vnum = vnum;
       if ( rows[i].room.length != 0 )
       {
@@ -50,6 +50,9 @@ var loadRoom = function(vnum) {
     Util.debug("Loaded Room " + vnum);
 
   });
+};
+
+var saveRooms = function() {
 };
 
 var loadRooms = function() {
@@ -75,25 +78,38 @@ var playerToRoom = function(plr, room) {
 
  Util.debug("Adding player to room " + room);
 
+ async.waterfall([
+     function(callback) {
+
   if ( player[plr.id].room != -1 )
     playerFromRoom(plr);
 
   if ( rooms[room].players == undefined )
     rooms[room].players = [];
+  callback(null,callback);
+     },
+     function (arg, callback) {
+        rooms[room].players[plr.id] = plr.name;
+        player[plr.id].room = room;
+        callback(null,callback);
+     },
+     function (arg,callback) {
+        Util.msgroom( room, player[plr.id].name + " has arrived.", player[plr.id].name);
+        callback(null,callback);
+     }], function(err, results ) {
+       
+     });
 
-  rooms[room].players[plr.id] = plr.name;
-  player[plr.id].room = room;
-  Util.msgroom( room, player[plr.id].name + " has arrived.", player[plr.id].name);
 };
 
 var playerFromRoom = function(plr) {
   var vnum = player[plr.id].room;
   var id = player[plr.id].id;
 
-  delete rooms[room].players.id;
+  delete rooms[vnum].players[id];
 
-  if ( rooms[room].players == undefined )
-    rooms[room].players = [];
+  if ( rooms[vnum].players == undefined )
+    rooms[vnum].players = [];
 
   player[plr.id].room = -1;
   Util.debug("Player removed from room.");

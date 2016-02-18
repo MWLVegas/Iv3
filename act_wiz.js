@@ -27,7 +27,7 @@ var recoverCopyover = function() {
 var doCopyover = function(socket, msg) {
 
   async.waterfall([
-      function() {
+      function(callback) {
 
         Util.debug("Starting copyover.");
         var stream = fs.createWriteStream("copyover.dat");
@@ -39,8 +39,8 @@ var doCopyover = function(socket, msg) {
             {
               copyover[player[x].id] = player[x].name;
               player[x].sock.emit('copyover','');
-              socket.emit("info", "<img src='http://kefka.redcrown.net/images/fmv/disex.png'><br />");
-              socket.emit("info", "##0AFThe bright flash of the Light of Judgement covers the land!".color());
+               player[x].sock.emit("info", "<img src='http://kefka.redcrown.net/images/fmv/disex.png'><br />");
+               player[x].sock.emit("info", "##0AFThe bright flash of the Light of Judgement covers the land!".color());
             }
 
           }
@@ -49,12 +49,10 @@ var doCopyover = function(socket, msg) {
           stream.write( JSON.stringify(copyover));
           stream.end();});
         callback(null, stream);
-        }
-
         },
-        function(arg,nextCallback) {
+        function(arg,callback) {
           Util.info("Saved players. Rebooting.");
-          nextCallback(null,stream);
+          callback(null,callback);
         }], function(err, results ) {
           Util.info("Exiting.");
           process.exit();
@@ -75,10 +73,11 @@ var doAsave = function(socket,msg) {
         Util.debug("Rooms done");
 
         Util.msg(socket,"Rooms saved.");
-        callback(null);
+        callback(null, callback);
       },
       function(arg,callback) {
         Util.info("Saving Mobs.");
+        callback(null,callback);
       }], function( err, results )
       {
         Util.msg(socket,"World saved.");

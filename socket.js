@@ -7,7 +7,6 @@ GLOBAL.player = [];
 GLOBAL.port = 6662;
 GLOBAL.listenport = 6661;
 
-GLOBAL.debug = true;
 GLOBAL.server = net.createServer(newSocket);
 
 
@@ -42,13 +41,13 @@ hio.on('connection', function(socket) {
 
       async.waterfall([
           function(callback) { save.savePlayer(player[socket.id]); Util.debug("Saved " + player[socket.id].name);
-            callback(null,null);
+            callback(null,callback);
           },
           function(arg1,callback) { 
             if ( player[socket.id].state == 4 )
               Util.msgall(player[socket.id].name + " has disconnected.",null, "chat");
             Util.info("Disconnected: " + player[socket.id].name + " - " + player[socket.id].ip);
-            callback(null,arg1);
+            callback(null,callback);
 
           } ], function (err, results) { 
             Util.debug("Removing " + player[socket.id].name);
@@ -170,12 +169,14 @@ hio.on('connection', function(socket) {
 
           var name = Util.encrypt( player[socket.id].name, player[socket.id].id);
           player[socket.id].dec = name;
+           Util.debug("Password recovered and decrypted");
+          callback(pass, callback); },
 
-          callback(pass); },
           function(callback){ 
             name = Util.encrypt(player[socket.id].name, player[socket.id].id );
+            Util.debug("Name encrypted");
             player[socket.id].dec = name;
-            callback(null,name);
+            callback(name, callback);
           }
     ], function(err, results) {
 

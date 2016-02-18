@@ -1,5 +1,3 @@
-var act_info = require ("./act_info.js");
-var act_wiz = require ("./act_wiz.js");
 
 var commandList = [];
 var aliasList = [];
@@ -63,7 +61,8 @@ var doQuit = function (socket, msg) {
 
   character.removePlayer( player[socket.id] );
   socket.emit("disconnect","Goodbye!");
-  socket.disconnect();
+//  character.remotePlayer( player[socket.id] );
+//  socket.disconnect();
 };
 
 var doOoc = function( socket,msg) {
@@ -139,6 +138,9 @@ function loadAliases() {
     createAlias("l", "look");
     createAlias("oco", "ooc");
     createAlias("gos", "gossip");
+
+    createAlias("n", "north");
+    createAlias("s", "south");
   },1000);
 
 }
@@ -147,6 +149,13 @@ function loadFunctions() {
   // Command table
 
   setTimeout( function() {
+
+    createCommand("north", act_move.doNorth);
+    createCommand("south", act_move.doSouth);
+    createCommand("east", act_move.doEast);
+    createCommand("west", act_move.doWest);
+    createCommand("up", act_move.doUp);
+    createCommand("down", act_move.doDown);
 
     createCommand("say", doSay);
     createCommand("ooc", doOoc);

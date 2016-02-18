@@ -23,6 +23,12 @@ var doWho = function(socket,msg) {
 var doLook = function(socket,msg) { 
   var room = rooms[player[socket.id].room];
 
+  if ( room == undefined ) {
+    Util.msg(socket,"An error has occurred.");
+    Util.error("Player reporting room " + player[socket.id].room + " but no room found.");
+    return;
+  }
+
   var exits = false;
   var info = "" + room.name + "[" + room.vnum + "] <br />" + 
     room.desc + " <br /> <br />" + 
@@ -40,6 +46,7 @@ var doLook = function(socket,msg) {
 
   for ( var x in room.players )
   {
+    if ( player[x] && player[x].id != socket.id )
     info = info + "    "+ player[x].name + " is here. <br />";
   }
 

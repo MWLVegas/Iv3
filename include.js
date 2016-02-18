@@ -17,7 +17,9 @@ GLOBAL.character = require('./character.js');
 GLOBAL.config = require('./config.js');
 GLOBAL.save = require('./save.js');
 
+GLOBAL.act_info = require('./act_info.js');
 GLOBAL.act_wiz = require('./act_wiz.js');
+GLOBAL.act_move = require('./act_move.js');
 GLOBAL.olc = require('./olc.js');
 
 String.prototype.cap = function() {

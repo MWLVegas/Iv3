@@ -9,6 +9,9 @@ module.exports = {
     Util.debug("Messaging Room : " + vnum + " : " + rooms[vnum].name);
     for ( var x in player )
     {
+      if ( player[x].state != 4 || player[x].room != vnum)
+        continue;
+
       if ( plr != null && player[x].name == plr )
         continue;
 
@@ -56,7 +59,7 @@ module.exports = {
     return;
   },
   debug: function(msg) {
-    if ( debug == true )
+    if ( config.debug == true )
     {
       if ( typeof(msg) === 'object' ) 
         msg = JSON.stringify(msg);
@@ -119,19 +122,13 @@ module.exports = {
     console.log(msg );
   },
   encrypt: function(data, id) {
-    Util.debug("To Encrypt: " + data);
     var enc = "ENC!!"+ crypto.AES.encrypt(data,id);
-    Util.debug("Encrypted: " + enc);
     return enc;
   },
   decrypt: function(data,id) {
-    Util.debug("Rec:" + data);
-    Util.debug("ID: " + id);
     data = data.substring(5);
-    Util.debug("Str: " + data);
     var dec = crypto.AES.decrypt(data,id);
     dec = dec.toString( crypto.enc.Utf8);
-    Util.debug("Decrypted: " + dec);
     return dec;
   }
 

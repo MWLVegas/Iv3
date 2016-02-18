@@ -1,27 +1,24 @@
-GLOBAL.rooms = [];
+GLOBAL.rooms = {};
 
 var newRoom = function(vnum) {
   this.vnum = vnum;
   this.name = "";
   this.area = "Void";
   this.desc = "";
-  this.players = [];
-  this.mobs = [];
-  this.items = [];
-  this.exits = [];
+  this.players = {};
+  this.exits = {};
 }
 
 var saveRoom = function(room) {
   var r = rooms[room];
 
-  delete  r.people;
+  delete  r.players;
   delete r.mobs;
 
   var json = JSON.stringify(r);
-  Util.debug("Exits: " + r.exits);
 
   var query = "INSERT INTO rooms (vnum, name, area, room) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE room=?;";
-  db.query(query, [room, r.name, r.area, json, json, room]);
+  db.query(query, [room, r.name, r.area, json, json]);
 };
 
 var loadRoom = function(vnum) {
@@ -41,7 +38,11 @@ var loadRoom = function(vnum) {
       {
       var json = rows[i].room;
       rooms[vnum] = JSON.parse(json);
+      Util.debug(json);
+      Util.debug(rooms[vnum].exits);
       }
+
+      rooms[vnum].players = {};
 
       rooms[vnum].name = rows[i].name;
       rooms[vnum].area = rows[i].area;
@@ -84,7 +85,7 @@ var playerToRoom = function(plr, room) {
     playerFromRoom(plr);
 
   if ( rooms[room].players == undefined )
-    rooms[room].players = [];
+    rooms[room].players = {};
   callback(null,callback);
      },
      function (arg, callback) {
@@ -105,10 +106,12 @@ var playerFromRoom = function(plr) {
   var vnum = player[plr.id].room;
   var id = player[plr.id].id;
 
+  Util.debug( rooms[vnum].players);
+
   delete rooms[vnum].players[id];
 
   if ( rooms[vnum].players == undefined )
-    rooms[vnum].players = [];
+    rooms[vnum].players = {};
 
   player[plr.id].room = -1;
   Util.debug("Player removed from room.");

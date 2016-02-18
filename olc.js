@@ -188,7 +188,11 @@ var doLink = function(socket,dat) {
 };
 
 var linkRoom = function( vnum, toRoom, dir ) {
+  Util.debug("Typeof: " + typeof(rooms[vnum].exits));
+  Util.debug("Curr: " + rooms[vnum].exits);
+  Util.debug("Linking room " + vnum + " to " + toRoom + " " + dir);
   rooms[vnum].exits[dir] = toRoom;
+  Util.debug("Now: " + rooms[vnum].exits);
 }
 
 var doCreate = function(socket, data ) {

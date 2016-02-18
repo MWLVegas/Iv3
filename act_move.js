@@ -48,13 +48,11 @@ var canMove = function(socket, dir ) {
     return false;
   }
 
-  var exits = rooms[vnum].exits;
+  var exits = rooms[vnum].exits; //JSON.parse(rooms[vnum].exits);
 
 
   if ( !exits[dir] )
   {
-    Util.debug("Typeof : " + typeof(rooms[vnum].exits) + " Type Exit: " + typeof(exits) );
-    Util.debug( "Exits: " + exits + " Our Exit: " + exits[dir] );
     Util.msg(socket,"You do not seem to be able to go that way.");
     return false;
   }

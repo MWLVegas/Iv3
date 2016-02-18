@@ -35,18 +35,16 @@ var doLook = function(socket,msg) {
     "##DDD" + room.desc + " <br /> <br />" + 
     "##4E0[Exits:" ;
 
-  var roomExits = JSON.parse(room.exits);
+  var roomExits = room.exits;//JSON.parse(room.exits);
 
   for ( var y in roomExits )
   {
-    Util.debug("Exit: " + y);
     if ( !exits ) 
       exits = true;
     info = info + " " + y;
   }
   if ( !exits )
   {
-    Util.debug("No exits.");
     info = info + " none!";
   }
 

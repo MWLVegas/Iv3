@@ -21,6 +21,7 @@ var doWho = function(socket,msg) {
 };
 
 var doLook = function(socket,msg) { 
+
   var room = rooms[player[socket.id].room];
 
   if ( room == undefined ) {
@@ -30,24 +31,31 @@ var doLook = function(socket,msg) {
   }
 
   var exits = false;
-  var info = "" + room.name + "[" + room.vnum + "] <br />" + 
-    room.desc + " <br /> <br />" + 
-    "[Exits:" ;
-  for ( var x in room.exits )
+  var info = "##4DD" + room.name + " ##FFF[##CCC" + room.vnum + "##FFF] <br />" + 
+    "##DDD" + room.desc + " <br /> <br />" + 
+    "##4E0[Exits:" ;
+
+  var roomExits = JSON.parse(room.exits);
+
+  for ( var y in roomExits )
   {
+    Util.debug("Exit: " + y);
     if ( !exits ) 
       exits = true;
-    info = info + " " + x;
+    info = info + " " + y;
   }
   if ( !exits )
+  {
+    Util.debug("No exits.");
     info = info + " none!";
+  }
 
-  info = info + "]<br /><br />";
+  info = info + "] <br /><br />";
 
   for ( var x in room.players )
   {
     if ( player[x] && player[x].id != socket.id )
-    info = info + "    "+ player[x].name + " is here. <br />";
+      info = info + "##CFF&nbsp;&nbsp;&nbsp;&nbsp;"+ player[x].name + " is here. <br />";
   }
 
   Util.msg(socket,info);

@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Ivalice 3</title>
+        <link rel='shortcut icon' type='image/x-icon' href='http://ivalicemud.com/favicon.png' />
+
+    <link rel="stylesheet" type="text/css" href="http://ivalicemud.com/iv3.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+    <style>
+
+
+.ui-dialog-buttonpane { background:#000; }
+.ui-dialog-titlebar-close { display: inline; }
+.ui-dialog-titlebar { height:25px; background:#333; border:none; }
+.ui-dialog-title { height:15px; font-size:80% !important; color:#EEE; background:#333; top:1; border:none; }
+.ui-dialog-content { overflow-y:auto; color:#fff; padding:3px; width:100%; }
+.ui-dialog { background:#000; padding:10px; margin:1px; border-color:#333; }
+
+ul { width:"100px"; height:100; list-style-type: none; margin: 0; padding: 0; font-size:80% !important;  font-family: "Lucida Console", Monaco, monospace;}
+
+    </style>
+
+    <style id="customCSS"></style>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+    <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/aes.js"></script>
+    <script src="http://ivalicemud.com/iv3.js"></script>
+
+    <!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
+    <script type="text/javascript">
+    window.cookieconsent_options = {"message":"This website uses cookies to ensure you get the best experience. By continuing to use our site, you consent to our use.","dismiss":"Got it!","learnMore":"","link":null,"theme":"dark-floating"};
+    </script>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/1.0.9/cookieconsent.min.js"></script>
+    <!-- End Cookie Consent plugin -->
+
+  </head>
+  <body>
+
+    <div height=100px>Test</div>
+
+    <div id="announce" title="">
+    </div>
+
+    <form id="inputform" action="" onsubmit="return doInput(); return false;">
+      <input id="m" autocomplete="off" /></input><button>Send</button> 
+      <label id="scrollLabel">Hold<input type="checkbox" id="scrollLock"></label>
+    </form>
+  </body>
+</html>
+

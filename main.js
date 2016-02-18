@@ -4,21 +4,25 @@ async.waterfall([
     function(callback) {
       Util.info("Attempting DB Connection");
       database.connect( config.dbpassword);
-      callback(null);
+      callback(null,callback);
     },
-    function(callback) {
+    function(arg, callback) {
       setTimeout( function() { 
       Room.loadRooms();
-      callback(null); }, 1500);
+      callback(null, callback); }, 1500);
     },
-    function(callback) {
+    function(arg,callback) {
       Util.info("Recovering copyover details");
       act_wiz.recoverCopyover();
-      callback(null);
+      callback(null,callback);
     },
-    function(callback) {
+    function(arg, callback) {
+      act_update.loadTimers();
+      callback(null,callback);
+    },
+    function(arg, callback) {
       server.listen(listenport);
-      callback(null);
+      callback(null, callback);
     }
 
 ], function(err, result) {

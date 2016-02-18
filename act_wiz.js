@@ -16,7 +16,7 @@ var recoverCopyover = function() {
       return;
     }
 
-    Util.debug("Copyover info: " + data);
+//    Util.debug("Copyover info: " + data);
     Util.info("Copyover recovery found. Waiting for connections.");
 
     fs.unlink('copyover.dat');
@@ -37,7 +37,7 @@ var doCopyover = function(socket, msg) {
           for ( var x in player ) {
             if ( player[x].state == 4 )
             {
-              save.savePlayer(player[x].sock);
+              save.savePlayer(player[x]);
               copyover[player[x].id] = player[x].name;
               player[x].sock.emit('copyover','');
                player[x].sock.emit("info", "<img src='http://kefka.redcrown.net/images/fmv/disex.png'><br />");

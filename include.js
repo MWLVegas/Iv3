@@ -6,6 +6,7 @@ GLOBAL.crypto = require('crypto-js');
 GLOBAL.async = require('async');
 GLOBAL.fs = require('fs');
 GLOBAL.moment = require('moment');
+GLOBAL.CronJob = require('cron').CronJob;
 
 var striptags = require('striptags');
 
@@ -23,6 +24,7 @@ GLOBAL.act_info = require('./act_info.js');
 GLOBAL.act_wiz = require('./act_wiz.js');
 GLOBAL.act_move = require('./act_move.js');
 GLOBAL.olc = require('./olc.js');
+GLOBAL.act_update = require('./act_update.js');
 
 String.prototype.cap = function() {
   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);

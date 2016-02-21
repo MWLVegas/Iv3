@@ -12,6 +12,14 @@ function doInput() {
 
   var str = $('#m').val().trim();
 
+  if ( str == "alias" )
+  {
+    $("#aliasWindow").dialog("open");
+    $('#m').val('');
+
+    return false;
+  }
+
   if ( str.trim().length == 0 )
     return false;
 
@@ -25,7 +33,10 @@ function doInput() {
   }
   else
   {
-    socket.emit('input',userid+"~"+str);
+    if ( !checkAlias(str) )
+    {
+      socket.emit('input',userid+"~"+str);
+    }
     inputScroll.push(str);
     inputNum = inputScroll.length-1;
     currInput = inputNum+1;
@@ -35,6 +46,19 @@ function doInput() {
   return false;
 
 }
+
+
+function checkAlias( str )
+{
+  if ( aliases[str] )
+  {
+    socket.emit('input',userid+"~"+aliases[str]);
+    return true;
+  }
+
+  return false;
+}
+
 $('form').submit(function() { 
   doInput();
   return false;
@@ -75,7 +99,17 @@ function showmsg(data, channel) {
   {
     blinkTitle();
   }
+
+  var input = "<DIV>"+data+"<DIV>";
+  input = $(input).text();
+  checkTrigger(input);
+
 }
+
+function checkTrigger(input) {
+  return;
+}
+
 function scrollBottom(channel) {
   if(document.getElementById('scrollLock').checked) {
     $('#'+channel).css("border-color: #FF0000");
@@ -115,15 +149,14 @@ $( document ).ready(function() {
   popup("chat",  "Chat", "");
   popup("info",  "System","");
 
-  //window.history.pushState( null, "Ivalice 3", "ivalicemud.com/iv3.html");
-  showmsg("Ivalice v3.0 - Loaded");
 
+  loadAliases();
+  loadTriggers();
 
   $('#m').keyup( function( event ) {
     if ( event.which != 38 && event.which != 40 ) 
       return;
 
-//    console.log(event.which + " Curri: " + currInput + " Val: " + inputScroll.length);
     if ( event.which == 38 ) { // Up
       console.log("Up arrow");
       if ( currInput == 0 )
@@ -140,11 +173,13 @@ $( document ).ready(function() {
         $('#m').val( '');
         return;
       }
-    currInput++; 
+      currInput++; 
       $('#m').val( inputScroll[currInput]);
 
     }
   });
+
+  showmsg("Ivalice v3.0 - Loaded");
 
 
 });
@@ -291,6 +326,110 @@ function clearCopyover() {
   console.log("Copyover Cookie Wiped");
 }
 
+
+var aliases = {};
+var triggers = [];
+
+function loadAliases() {
+  $("body").append("<div id='aliasWindow'> <select id='aliasList' style='width:150px' size=15></select>" +
+      "  <input id='aliasName'>" +
+      "  <textarea id='aliasShow' rows=10>Select an Alias</textarea>" +
+      "  <button id='saveAlias'>Save</button>" +
+      "  <button id='newAlias'>New</button></div>");
+
+  $( "#aliasWindow" ).dialog({
+    autoOpen: false,
+    open: function( event, ui ) {
+      for ( var x in aliases )
+      {
+        $('#aliasList').append(x);
+      }
+    }
+  });
+  //  $("#aliasWindow").dialog("open");
+
+  $('aliasWindow').dialog();
+  var cookie = getCookie("aliases");
+  if ( cookie != undefined && cookie.trim().length > 1)
+  {
+    console.log("Aliases loading: " + JSON.parse(cookie));
+    cookie = JSON.parse(cookie);
+    for ( var x in cookie )
+    {
+      aliases[x] = cookie[x];
+    }
+  }
+  else
+    console.log("No aliases");
+  populateAliases();
+  $('#aliasList').on('change', function() {
+    var text = $('#aliasList').val();
+    var name = $('#aliasList option:selected').text()
+
+      $('#aliasShow').val(text);
+    $('#aliasName').val(name)
+      console.log("text should now be " + text);
+  });
+
+  $('#newAlias').on('click', function() {
+    var name = "** New  " + Math.floor((Math.random() * 1000 + 1));
+    aliases[name] = "New Alias";
+    populateAliases();
+    $('#aliasList option:contains(' + name + ')').prop({ selected: true });
+        $('#aliasName').val(name);
+        $('#aliasShow').val("New Alias");
+        });
+    $('#saveAlias').on('click', function() {
+      var name2 = $('#aliasList option:selected').text()
+        var name = "" + $('#aliasName').val();
+      if (name2.trim() == 0)
+        return;
+      if (name != name2) {
+        console.log("Deleting " + name2 + " to replace with " + name);
+        delete aliases[name2];
+      }
+      aliases[name] = $("#aliasShow").val();
+      populateAliases();
+      //console.log(aliases);
+      $('#aliasList option:contains(' + name + ')').prop({        selected: true      });
+          saveAliases();
+          });
+      };
+
+      function saveAliases() {
+        console.log("Saving aliases: " + aliases);
+
+for ( var x in aliases ) {
+  document.cookie="aliases="+ JSON.stringify(aliases);
+//Stuff
+}
+}
+      function populateAliases() {
+        //aliases = aliases.sort();
+        $("#aliasList").empty();
+
+        for (var x in aliases) {
+          $("#aliasList").append('<option id=' + x + ' value="' + aliases[x] + ' ">' + x + '</option>');
+
+        }
+
+      }
+
+function loadTriggers() {
+  var cookie = getCookie("triggers");
+
+  if ( cookie != undefined )
+  {
+
+    cookie = JSON.parse(cookie);
+    for ( var x in cookie )
+    {
+      triggers[x] = cookie[x];
+    }
+  }
+  showmsg("Triggers loaded.");
+
+}
 
 var title = top.document.title;
 var titleblink;

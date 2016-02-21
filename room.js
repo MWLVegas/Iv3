@@ -94,7 +94,10 @@ var playerToRoom = function(plr, room) {
         callback(null,callback);
      },
      function (arg,callback) {
+       if ( player[plr.id].state == 4 )
         Util.msgroom( room, player[plr.id].name + " has arrived.", player[plr.id].name);
+       else
+        Util.msgroom( room, player[plr.id].name + " materializes in a bright flash.", player[plr.id].name);
         callback(null,callback);
      }], function(err, results ) {
        

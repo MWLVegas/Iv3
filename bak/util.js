@@ -132,7 +132,3 @@ module.exports = {
   }
 
 };
-
-//String.prototype.cap = function() {
-//   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
-//}

@@ -59,6 +59,7 @@ var doSay = function (socket, msg) {
 
 var doQuit = function (socket, msg) {
 
+  save.savePlayer(socket);
   character.removePlayer( player[socket.id] );
   socket.emit("disconnect","Goodbye!");
 //  character.remotePlayer( player[socket.id] );
@@ -87,6 +88,7 @@ var doGossip = function( socket,msg) {
 
 var doSave = function(socket) {
   save.savePlayer( player[socket.id] );
+  Util.msg(socket,"Saved!");
 }
 
 var doReboot = function(socket) {
@@ -166,6 +168,9 @@ function loadFunctions() {
     createCommand("gossip", doGossip);
 
     createCommand("look", act_info.doLook);
+    createCommand("whois", act_info.doWhois);
+
+
     createCommand("who", act_info.doWho);
     createCommand("quit", doQuit);
 

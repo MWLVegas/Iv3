@@ -29,7 +29,7 @@ var doLook = function(socket,msg) {
   }
 
   var exits = false;
-  var info = "##4DD" + room.name + " ##FFF[##CCC" + room.vnum + "##FFF] <br />" + 
+  var info = "<br />##4DD" + room.name + " ##FFF[##CCC" + room.vnum + "##FFF] <br />" + 
     "##DDD" + room.desc + " <br /> <br />" + 
     "##4E0[Exits:" ;
 

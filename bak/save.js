@@ -6,8 +6,9 @@ var savePlayer = function( character ) {
   var json = JSON.stringify(character);
   player[character.id].sock = socket;
 
-  var query = "UPDATE players SET pfile=?  where name=?;";
-  db.query(query, [ json, player[character.id].name ]);
+  var query = "UPDATE players SET pfile=?, logoff=? where name=?;";
+  db.query(query, [ json, Math.floor(Date.now() / 1000), player[character.id].name ]);
+
 };
 
 var loadPlayer = function( character ) {

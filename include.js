@@ -25,6 +25,7 @@ GLOBAL.act_wiz = require('./act_wiz.js');
 GLOBAL.act_move = require('./act_move.js');
 GLOBAL.olc = require('./olc.js');
 GLOBAL.act_update = require('./act_update.js');
+GLOBAL.act_comm = require('./act_comm.js');
 
 String.prototype.cap = function() {
   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
@@ -86,7 +87,6 @@ String.prototype.forChat = function () {
   var str = this.trim();
   var str = this.replace(/\<3/g,":heart:");
   str = str.striptag(bannedTags);
-
   return applyEmotesFormat(str);
 }
 module.exports.forChat = String.prototype.forChat;
@@ -135,3 +135,22 @@ Number.prototype.lengthFormat = function() {
 
 module.exports.lengthFormat = Number.prototype.lengthFormat;
 
+String.prototype.variable = function(user, target) {
+
+  var   str = this;
+
+  str = str.replace(/\$n/g, user);
+  str = str.replace(/\$m/g, "him");
+  str = str.replace(/\$s/g, "his");
+  str = str.replace(/\$e/g, "he");
+
+  str = str.replace(/\$N/g, target);
+  str = str.replace(/\$M/g, "him");
+  str = str.replace(/\$S/g, "his");
+  str = str.replace(/\$E/g, "he");
+
+
+  return str;
+}
+
+module.exports.variable = String.prototype.variable;

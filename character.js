@@ -25,7 +25,10 @@ module.exports = function character(socket) {
 }
 
 var removePlayer = function( character ) {
+  if ( player[character] )
+  {
   Room.playerFromRoom( player[character.id] );
+  }
 }
 
 

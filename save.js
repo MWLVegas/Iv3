@@ -3,7 +3,20 @@ var savePlayer = function( character ) {
   var socket = player[character.id].sock;
   player[character.id].sock = null;
 
-  var json = JSON.stringify(character);
+  var cache = [];
+  var json = JSON.stringify(character, function(key, value) {
+    if (typeof value === 'object' && value !== null) {
+      if (cache.indexOf(value) !== -1) {
+        // Circular reference found, discard key
+        return;
+      }
+      // Store value in our collection
+      cache.push(value);
+    }
+    return value;
+  });
+
+//  var json = JSON.stringify(character);
   player[character.id].sock = socket;
 
   var query = "UPDATE players SET pfile=?, logoff=? where name=?;";
@@ -24,9 +37,11 @@ var loadPlayer = function( character ) {
     for ( var i in rows ) {
       if ( rows[i].pfile.length == 0 )
       {
+        player[character.id].room = 1;
         Util.debug("No pfile yet.");
+        savePlayer(character);
         return;
-     
+
       }
 
       var json = rows[i].pfile;

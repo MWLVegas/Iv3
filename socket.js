@@ -1,8 +1,9 @@
 GLOBAL.app = require('express')();
 GLOBAL.http = require('http').Server(app);
 GLOBAL.hio = require('socket.io')(http);
-GLOBAL.sockets = [];
-GLOBAL.player = [];
+
+GLOBAL.sockets = {};
+GLOBAL.player = {};
 
 GLOBAL.port = 6662;
 GLOBAL.listenport = 6661;
@@ -45,7 +46,9 @@ hio.on('connection', function(socket) {
           },
           function(arg1,callback) { 
             if ( player[socket.id].state == 4 )
+            {
               Util.msgall(player[socket.id].name + " has disconnected.",null, "chat");
+            }
             Util.info("Disconnected: " + player[socket.id].name + " - " + player[socket.id].ip);
             callback(null,callback);
 
@@ -79,7 +82,7 @@ hio.on('connection', function(socket) {
         save.loadPlayer( player[socket.id] );
         Util.msgall(player[socket.id].name + " has reconnected!", null, "chat");
         socket.emit('copyoversuccess', player[socket.id].name);
-        sio.state(socket,4);
+      setTimeout(function() { sio.state(socket,4) },10);
         delete copyoverdat[info.id];
         return;
       }
@@ -231,7 +234,7 @@ hio.on('connection', function(socket) {
         save.loadPlayer( player[socket.id] );
         Util.msgall(player[socket.id].name + " has connected!", null, "chat");
         socket.emit('loggedin', player[socket.id].dec);
-        sio.state(socket,4);
+              setTimeout(function() { sio.state(socket,4) },10);
       }
       else {
         Util.msg(socket,"Invalid password. Try again. Enter 'cancel' to go back to character selection.");

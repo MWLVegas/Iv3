@@ -4,7 +4,20 @@ String.prototype.cap = function() {
 
 module.exports = {
 
-  msgroom: function ( vnum, msg, plr ) {
+  findTarget: function( socket, target ) {
+    for ( var x in player ) {
+      if ( player[x].state == 4 && ( player[x].name.toLowerCase() == target.toLowerCase() ||  player[x].name.toLowerCase().startsWith(target.toLowerCase())  ) )
+      {
+//        Util.debug("findTarget: Found "+ player[x].name);
+        return x;
+      }
+    }
+
+//    Util.debug("findTarget: No Target Found");
+    return null;
+  },
+
+  msgroom: function ( vnum, msg, plr, channel ) {
     Util.debug("Room Msg: " + vnum);
     Util.debug("Messaging Room : " + vnum + " : " + rooms[vnum].name);
     for ( var x in player )
@@ -15,7 +28,7 @@ module.exports = {
       if ( plr != null && player[x].name == plr )
         continue;
 
-      Util.msg(player[x].sock,msg);
+      Util.msg(player[x].sock,msg, channel);
     }
   },
   announce: function( socket ) {

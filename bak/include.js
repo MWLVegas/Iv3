@@ -5,6 +5,9 @@ GLOBAL.io = require('socket.io');
 GLOBAL.crypto = require('crypto-js');
 GLOBAL.async = require('async');
 GLOBAL.fs = require('fs');
+GLOBAL.moment = require('moment');
+GLOBAL.CronJob = require('cron').CronJob;
+
 var striptags = require('striptags');
 
 GLOBAL.Room = require('./room.js');
@@ -21,6 +24,7 @@ GLOBAL.act_info = require('./act_info.js');
 GLOBAL.act_wiz = require('./act_wiz.js');
 GLOBAL.act_move = require('./act_move.js');
 GLOBAL.olc = require('./olc.js');
+GLOBAL.act_update = require('./act_update.js');
 
 String.prototype.cap = function() {
   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
@@ -86,3 +90,48 @@ String.prototype.forChat = function () {
   return applyEmotesFormat(str);
 }
 module.exports.forChat = String.prototype.forChat;
+
+String.prototype.firstWord = function () {
+
+  if ( this.indexOf(" ") == -1 )
+    return this.toString().trim();
+
+  return this.substring(0,data.indexOf(" ")).trim();
+
+}
+module.exports.firstWord = String.prototype.firstWord;
+Number.prototype.lengthFormat = function() {
+
+  var str = "";
+  function numberEnding (number) {
+    return (number > 1) ? 's ' : ' ';
+  }
+
+  var temp = Math.floor(this);
+  var years = Math.floor(temp / 31536000);
+  if (years) {
+    str = str + years + ' year' + numberEnding(years);
+  }
+  //TODO: Months! Maybe weeks?
+  var days = Math.floor((temp %= 31536000) / 86400);
+  if (days) {
+    str = str +  days + ' day' + numberEnding(days);
+  }
+  var hours = Math.floor((temp %= 86400) / 3600);
+  if (hours) {
+    str = str + hours + ' hour' + numberEnding(hours);
+  }
+  var minutes = Math.floor((temp %= 3600) / 60);
+  if (minutes) {
+    str = str + minutes + ' minute' + numberEnding(minutes);
+  }
+  var seconds = temp % 60;
+  if (seconds) {
+    str = str + seconds + ' second' + numberEnding(seconds);
+  }
+
+  return str.trim();
+};
+
+module.exports.lengthFormat = Number.prototype.lengthFormat;
+

@@ -79,12 +79,12 @@ hio.on('connection', function(socket) {
                 socket.emit("id", player[socket.id].id);
 
                 player[socket.id].name = name.cap();
-                player[socket.id].pass = pass;
+                   save.loadPlayer( player[socket.id] );
                 socket.emit('copyoversuccess', player[socket.id].name);
                 Util.msgall(player[socket.id].name + " has connected.", null, "chat");
 
-                setTimeout(function() { sio.state(socket,4) },10);
-
+                setTimeout(function() { sio.state(socket,4); act_info.doLook(socket,""); },10);
+i
               }
               else
               {

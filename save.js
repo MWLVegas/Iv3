@@ -5,6 +5,9 @@ var savePlayer = function( character ) {
   var socket = player[character.id].sock;
   player[character.id].sock = null;
 
+  if ( player[character.id].name == "Unknown")
+    return;
+
   var cache = [];
   var json = JSON.stringify(character, function(key, value) {
     if (typeof value === 'object' && value !== null) {

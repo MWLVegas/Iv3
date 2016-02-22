@@ -26,12 +26,12 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
   <body>
     <div id="announce" title="">
     </div>
-        <div id='wait'>
-          <div id='loaddiv'>
-            <div class='loader'>
-            </div>
-          </div>
+    <div id='wait'>
+      <div id='loaddiv'>
+        <div class='loader'>
         </div>
+      </div>
+    </div>
 
 
     <form id="inputform" action="" onsubmit="return doInput(); return false;">
@@ -39,9 +39,11 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
 
         <div id="tabs6">
           <ul>
-            <li><a href="#" title="Aliases" onClick='    $("#aliasWindow").dialog("open");'><span>Aliases</span></a></li>
+            <li><a href="#" title="Aliases" onClick='$("#aliasWindow").dialog("open");'><span>Aliases</span></a></li>
             <li><a href="#" title="Triggers" onClick='doTriggers()'><span>Triggers</span></a></li>
             <li><a href="#" id='freeze' title="Freeze Windows" onClick='doFreeze()'><span id='freezeText'>Freeze</span></a></li>
+            <li><a href="#" id='settings' title="Settings" onClick='$("#settingsWindow").dialog("open");'><span>Settings</span></a></li>
+
           </ul>
         </div>
         <div>
@@ -54,7 +56,41 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
         </div>
 
         <p style='padding:3px;' ><input id="m" autocomplete="off" /></input><button>Send</button> </p>
-        <div id='login' title='Login'>
+
+        <div id='settingsWindow' style='display:none'>
+          <div id='left'>
+            <p>
+            <input id='blink' type='checkbox'>
+            <label for='blink'><span></span>Blink Title when Inactive</label>
+            <br/>
+            </p>
+            <p>
+            <input class='text' id='savecommand' type='checkbox'>
+            <label for='savecommand'><span></span>Don't Clear Command Bar</label>
+
+            </p>
+          </div>
+          <div id='right'>
+            <p>
+            <label for='timestamp'>Timestamp </label>
+            <input class='text' id='timestamp'>
+            </p>
+            <br />
+            <p>
+            <label for='manacolor'>Mana Color </label>
+            <input class='text' id='manacolor'>
+            </p>
+            <br />
+            <p>
+            <label for='healthcolor'>Health Color </label>
+            <input class='text' id='healthcolor'>
+            </p>
+          </div>
+        </div>
+
+
+
+        <div style='display:none;' id='login' title='Login'>
           <div style=float:left>Name:</div>
           <div style='float:right;'>
             <input tabindex=2 id='loginName'> </div>
@@ -77,6 +113,7 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
           <div style='text-align:center;' id='messages'>
           </div>
         </div>
+
 
     </form>
   </body>

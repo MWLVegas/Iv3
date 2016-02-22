@@ -41,9 +41,115 @@ hio.on('connection', function(socket) {
   Util.announce(socket);
 
   socket.on('nocopyover', function(msg) { 
-        socket.emit('info',config.greeting.color(true));
-
+    socket.emit('info',config.greeting.color(true));
   });
+
+  socket.on('formlogin', function(msg) {
+    Util.debug("Login received: " + msg );
+    var data = msg.split("::");
+    var name = data[0];
+    var pass = data[1];
+
+    async.waterfall([
+        function(callback) {
+          player[socket.id].id = socket.id.toString();
+          socket.emit("id", player[socket.id].id);
+          var query = "SELECT name,passwd FROM players WHERE name=?";
+          db.query(query, name, function( err, rows, fields ) {
+            if (err) throw err;
+
+            if ( rows.length == 0 )
+            {
+              socket.emit("clear","");
+              socket.emit("loginmsg","Character not found.");
+              sio.state(socket,0);
+              return;
+            }
+
+            for ( var i in rows ) {
+              if ( typeof( rows[i]) == "function" )
+              {
+                Util.debug("Function: " + JSON.stringify(rows[i]));
+                return;
+              }
+
+              player[socket.id].pass = rows[i].passwd;
+              player[socket.id].name = rows[i].name;
+              if ( pass == player[socket.id].pass ) {
+                socket.emit("id", player[socket.id].id);
+
+                player[socket.id].name = name.cap();
+                player[socket.id].pass = pass;
+                socket.emit('copyoversuccess', player[socket.id].name);
+                Util.msgall(player[socket.id].name + " has connected.", null, "chat");
+
+                setTimeout(function() { sio.state(socket,4) },10);
+
+              }
+              else
+              {
+                socket.emit("loginmsg","Invalid password.");
+              }
+            }
+
+            callback(null,callback);
+          });
+        } ], function(err, results) { } );
+
+    return;
+  });
+
+  socket.on('formcreate', function(msg) {
+        Util.debug("Login received: " + msg );
+
+    var data = msg.split("::");
+    var name = data[0];
+    var pass = data[1];
+    var email = data[2];
+
+    async.waterfall([
+        function(callback) {
+          okayname = isValidName(name);
+          callback(null,okayname);
+        },
+        function(arg1,callback) {
+          if ( !okayname ) {
+            socket.emit('loginmsg',"That is an invalid name. Please try again.");
+            return;
+          }
+          var query = "SELECT name FROM players WHERE name=?";
+          db.query(query, name, function( err, rows, fields ) {
+            if (err) throw err;
+            if ( rows.length == 0 )
+            {
+              okayname = true;
+              callback(null,callback);
+            }
+            for ( var i in rows ) {
+              okayname = false;
+              callback(null,callback);
+            }
+          });
+        }], function(err, results) {
+          if ( !okayname ) { socket.emit('loginmsg','That name is already in use. Try again.'); return; }
+          socket.emit("id", player[socket.id].id);
+
+          player[socket.id].name = name.cap();
+          player[socket.id].pass = pass;
+          player[socket.id].email = email;
+          Util.info("New character: " + player[socket.id].name);
+          socket.emit('copyoversuccess', player[socket.id].name);
+          var post = {name: player[socket.id].name, passwd: pass };
+          var query = "INSERT INTO players SET ?;";
+          db.query(query,post);
+          Util.msg(socket,"Welcome aboard!");
+          Util.msgall(player[socket.id].name + " has begun adventuring on Ivalice!", null, "chat");
+
+          setTimeout(function() { sio.state(socket,4) },10);
+        });
+    return;
+  });
+
 
   socket.on('error', function (err) {     console.error(err.stack);   });
   socket.on('disconnect', function() {
@@ -94,7 +200,7 @@ hio.on('connection', function(socket) {
         save.loadPlayer( player[socket.id] );
         Util.msgall(player[socket.id].name + " has reconnected!", null, "chat");
         socket.emit('copyoversuccess', player[socket.id].name);
-      setTimeout(function() { sio.state(socket,4) },10);
+        setTimeout(function() { sio.state(socket,4) },10);
         delete copyoverdat[info.id];
         return;
       }
@@ -186,7 +292,7 @@ hio.on('connection', function(socket) {
 
           var name = Util.encrypt( player[socket.id].name, player[socket.id].id);
           player[socket.id].dec = name;
-           Util.debug("Password recovered and decrypted");
+          Util.debug("Password recovered and decrypted");
           callback(pass, callback); },
 
           function(callback){ 
@@ -248,7 +354,7 @@ hio.on('connection', function(socket) {
         save.loadPlayer( player[socket.id] );
         Util.msgall(player[socket.id].name + " has connected!", null, "chat");
         socket.emit('loggedin', player[socket.id].dec);
-              setTimeout(function() { sio.state(socket,4) },10);
+        setTimeout(function() { sio.state(socket,4) },10);
       }
       else {
         Util.msg(socket,"Invalid password. Try again. Enter 'cancel' to go back to character selection.");

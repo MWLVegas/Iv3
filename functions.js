@@ -87,12 +87,20 @@ var doSay = function (socket, msg) {
 
 var doQuit = function (socket, msg) {
 
+
+  async.waterfall( [ 
+      function(callback) { 
   save.savePlayer( player[socket.id]);
+  Util.msg(socket,"Saving!");
+  callback(null, callback);
+      },
+      function(arg, callback) { 
   //  character.removePlayer( player[socket.id] );
   Util.msgroom( player[socket.id].room, player[socket.id].name + " slowly fades out of sight.", player[socket.id].name);
+  socket.emit("disco","disco");
+  callback(null,callback) } ], function( err, results) { Util.debug("Player has quit"); });
 
-  socket.emit("disconnect","Goodbye!");
-  setTimeout( function() { character.removePlayer( player[socket.id] ); }, 10);
+//  setTimeout( function() { character.removePlayer( player[socket.id] ); }, 10);
   //  socket.disconnect();
 };
 

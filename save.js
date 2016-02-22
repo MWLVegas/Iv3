@@ -23,6 +23,7 @@ var savePlayer = function( character ) {
 
   var query = "UPDATE players SET pfile=?, logoff=? where name=?;";
   db.query(query, [ json, Math.floor(Date.now() / 1000), player[character.id].name ]);
+  Util.info(player[character.id].name + " saved.");
 
 };
 

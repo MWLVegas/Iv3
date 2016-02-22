@@ -26,23 +26,58 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
   <body>
     <div id="announce" title="">
     </div>
+        <div id='wait'>
+          <div id='loaddiv'>
+            <div class='loader'>
+            </div>
+          </div>
+        </div>
+
 
     <form id="inputform" action="" onsubmit="return doInput(); return false;">
-      <div id="tabs6">
-        <ul>
-          <li><a href="#" title="Link 1"><span>Link 1</span></a></li>
-          <li><a href="#" title="Link 2"><span>Link 2</span></a></li>
-          <li><a href="#" id='freeze' title="Freeze Windows" onClick='doFreeze()'><span id='freezeText'>Freeze</span></a></li>
-        </ul>
-      </div>
-      <div class="stat-bar">
-                <div class="health-bar-fluid"></div>
-      </div>
-      <div class="stat-bar">
-                <div class="mana-bar-fluid"></div>
-      </div>
+      <div style='top:-10px; margin:3px'>
 
-      <input id="m" autocomplete="off" /></input><button>Send</button> 
+        <div id="tabs6">
+          <ul>
+            <li><a href="#" title="Aliases" onClick='    $("#aliasWindow").dialog("open");'><span>Aliases</span></a></li>
+            <li><a href="#" title="Triggers" onClick='doTriggers()'><span>Triggers</span></a></li>
+            <li><a href="#" id='freeze' title="Freeze Windows" onClick='doFreeze()'><span id='freezeText'>Freeze</span></a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="stat-bar">
+            <div class="health-bar-fluid"></div>
+          </div>
+          <div class="stat-bar">
+            <div class="mana-bar-fluid"></div>
+          </div>
+        </div>
+
+        <p style='padding:3px;' ><input id="m" autocomplete="off" /></input><button>Send</button> </p>
+        <div id='login' title='Login'>
+          <div style=float:left>Name:</div>
+          <div style='float:right;'>
+            <input tabindex=2 id='loginName'> </div>
+          <br />
+          <div style=float:left>Password:</div>
+          <div style='float:right;'>
+            <input tabindex=3 id='loginPass' type='password'>
+          </div>
+          <br />
+          <p align=center style='padding-top:15px'>
+
+          New Character? <input tabindex=1 type='checkbox' id='newCharacter'>
+          </p>
+          <div id='emailDiv' style='display:none;'>
+            <div style=float:left>Email:</div>
+            <div style='float:right;'>
+              <input id='loginEmail'>
+            </div>
+          </div>
+          <div style='text-align:center;' id='messages'>
+          </div>
+        </div>
+
     </form>
   </body>
 </html>

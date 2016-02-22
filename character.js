@@ -26,6 +26,8 @@ module.exports = function character(socket) {
   this.max_hp = 20;
   this.max_mana = 20;
 
+  this.class = 0;
+
   socket.emit('id', this.id);
   socket.emit('connect', "");
   Util.info("Connect: " + this.ip + " - " + this.id);
@@ -39,5 +41,14 @@ var removePlayer = function( character ) {
   }
 }
 
+GLOBAL.classTable = {};
+
+classTable[0] = { name: "Black Mage" };
+//  blackmage: { name: "Black Mage" },
+//  whitemage: { name: "White Mage" },
+//  fighter: { name: "Fighter" },
+//  thief: { name: "Thief" }
+
 
 module.exports.removePlayer = removePlayer;
+//module.exports.classTable = classTable;

@@ -9,8 +9,8 @@ var doWho = function(socket,msg) {
     if ( player[x].state == 4)
     {
       count++;
-      var str = "[%*$-3$] %*".toString();
-      var arr = [ player[x].level,player[x].name ];
+      var str = "[%*$-3$ %*$10$] %*".toString();
+      var arr = [ player[x].level, classTable[ player[x].class].name, player[x].name ];
       Util.msg(socket, str, "info", arr );
     }
   }

@@ -32,11 +32,17 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
         <ul>
           <li><a href="#" title="Link 1"><span>Link 1</span></a></li>
           <li><a href="#" title="Link 2"><span>Link 2</span></a></li>
-          <li><a href="#" title="Link 3"><span>Link 3</span></a></li>
+          <li><a href="#" id='freeze' title="Freeze Windows" onClick='doFreeze()'><span id='freezeText'>Freeze</span></a></li>
         </ul>
       </div>
+      <div class="stat-bar">
+                <div class="health-bar-fluid"></div>
+      </div>
+      <div class="stat-bar">
+                <div class="mana-bar-fluid"></div>
+      </div>
+
       <input id="m" autocomplete="off" /></input><button>Send</button> 
-      <label id="scrollLabel">Hold<input type="checkbox" id="scrollLock"></label>
     </form>
   </body>
 </html>

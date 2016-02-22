@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 
 module.exports = function character(socket) {
 
@@ -7,7 +9,7 @@ module.exports = function character(socket) {
   this.sock = socket;
   this.id = socket.id.toString();//.substring(2);
   this.state = 0;
-  this.room = -1;
+  this.room = 1;
   this.pass = "";
 
   this.inventory;
@@ -17,6 +19,12 @@ module.exports = function character(socket) {
   this.gil = 0;
   this.exp = 0;
   this.level = 1;
+
+  this.hp = 20;
+  this.mana = 20;
+
+  this.max_hp = 20;
+  this.max_mana = 20;
 
   socket.emit('id', this.id);
   socket.emit('connect', "");

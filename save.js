@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 
 var savePlayer = function( character ) {
   var socket = player[character.id].sock;
@@ -16,7 +18,7 @@ var savePlayer = function( character ) {
     return value;
   });
 
-//  var json = JSON.stringify(character);
+  //  var json = JSON.stringify(character);
   player[character.id].sock = socket;
 
   var query = "UPDATE players SET pfile=?, logoff=? where name=?;";
@@ -50,15 +52,41 @@ var loadPlayer = function( character ) {
       var id = player[character.id].id;
       var state = player[character.id].state;
 
-      player[character.id] = JSON.parse(json);
-      player[character.id].sock = socket;
-      player[character.id].name = name;
-      player[character.id].id = id;
-      player[character.id].state = state;
+      player[character.id].sock = null;
+      var loaded = JSON.parse(json);
+      var orig =  player[character.id];
 
-      var room = player[character.id].room;
-      player[character.id].room = -1;
-      Room.playerToRoom(player[character.id], room);
+
+      async.waterfall( [
+          function(callback) {
+            for (var y in loaded ) {
+              var orig = player[id][y];
+              var val = loaded[y];
+              //        Util.debug(y+") Orig: " + orig + " is " + val);
+              player[id][y.toString()] = loaded[y];
+            }
+            //Util.debug("Stuffs: " + JSON.stringify(player[character.id]) );
+            callback(null,callback);
+
+          },
+          function(arg, callback) {
+
+            // Util.debug("NEW: " +  JSON.stringify(newone) );
+            //      Util.debug("Loaded Type: " + typeof(loaded) + " Old: " + typeof(old) );
+            //      var newArray = loaded.concat(old).unique();
+
+            //      player[character.id] = newone;//newArray; //JSON.parse(json);
+            player[id].sock = socket;
+            player[id].name = name;
+            player[id].id = id;
+            player[id].state = state;
+            callback(null,callback);
+          }, function(arg, callback) { 
+            var room = player[id].room;
+
+            player[id].room = -1;
+            Room.playerToRoom(player[id], room);
+          }], function(err,results) {} );  
     }
 
   });

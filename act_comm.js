@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 var channelChat = function ( socket, msg, format, targ )
 {
   var name = player[socket.id].name;

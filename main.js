@@ -1,4 +1,7 @@
+
+
 require("./include.js");
+Util.info(__filename + " loaded.");
 
 async.waterfall([
     function(callback) {
@@ -9,7 +12,7 @@ async.waterfall([
     function(arg, callback) {
       setTimeout( function() { 
       Room.loadRooms();
-      callback(null, callback); }, 1500);
+      callback(null, callback); }, 2500);
     },
     function(arg,callback) {
       Util.info("Recovering copyover details");

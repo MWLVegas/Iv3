@@ -1,3 +1,4 @@
+Util.info(__filename + " loaded.");
 
 var doWho = function(socket,msg) {
 

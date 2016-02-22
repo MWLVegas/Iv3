@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 GLOBAL.rooms = {};
 
 var newRoom = function(vnum) {
@@ -30,16 +32,23 @@ var loadRoom = function(vnum) {
       Util.error("Error loading room # " + vnum);
       return;
     }
+
     for ( var i in rows ) {
 
       rooms[vnum] = new newRoom(vnum);
       rooms[vnum].vnum = vnum;
+      if ( rows[i].room == undefined )
+        continue;
+
+      Util.debug( "Room Info #"+vnum+ " " +  rows[i].room );
+      Util.debug(vnum + " " + JSON.stringify(rooms[vnum]));
+
       if ( rows[i].room.length != 0 )
       {
       var json = rows[i].room;
       rooms[vnum] = JSON.parse(json);
-      Util.debug(json);
-      Util.debug(rooms[vnum].exits);
+//      Util.debug(json);
+//      Util.debug(rooms[vnum].exits);
       }
 
       rooms[vnum].players = {};
@@ -47,7 +56,6 @@ var loadRoom = function(vnum) {
       rooms[vnum].name = rows[i].name;
       rooms[vnum].area = rows[i].area;
     }
-    Util.debug("Loaded Room " + vnum);
 
   });
 };
@@ -56,6 +64,7 @@ var saveRooms = function() {
 };
 
 var loadRooms = function() {
+  Util.debug("Loading all rooms.");
   var query = "SELECT vnum FROM rooms WHERE 1";
   db.query(query, function (err, rows, field) {
     if (err) throw err;
@@ -69,7 +78,6 @@ var loadRooms = function() {
     }
   });
 
-  Util.info("Rooms loaded.");
 };
 
 var playerToRoom = function(plr, room) {

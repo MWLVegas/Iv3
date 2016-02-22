@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 //var Util = require('./util.js');
 GLOBAL.copyoverdat = {};
 

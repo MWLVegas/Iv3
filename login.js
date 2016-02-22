@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 
 module.exports = {
 
@@ -22,10 +24,19 @@ module.exports = {
           return;
         }
         for ( var i in rows ) {
-          Util.debug("Character found. Requesting password with ID " + player[socket.id].id.toString() );
+          if ( typeof( rows[i]) == "function" )
+          {
+            Util.debug("Function: " + JSON.stringify(rows[i]));
+            return;
+          }
+
+          Util.debug(typeof(rows[i]));
+
           socket.emit("login", "Enter your password:");
           player[socket.id].pass = rows[i].passwd;
           player[socket.id].name = rows[i].name;
+
+          Util.debug("Character found. Requesting password with ID " + player[socket.id].id.toString() + " : " + player[socket.id].pass);
           sio.state(socket,1);
         }
 

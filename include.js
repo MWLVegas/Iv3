@@ -10,9 +10,10 @@ GLOBAL.CronJob = require('cron').CronJob;
 
 var striptags = require('striptags');
 
+GLOBAL.Util = require('./util.js');
 GLOBAL.Room = require('./room.js');
 GLOBAL.login = require('./login.js');
-GLOBAL.Util = require('./util.js');
+
 GLOBAL.database = require('./database.js');
 GLOBAL.sio = require('./socket.js');
 GLOBAL.functions = require('./functions.js');
@@ -154,3 +155,5 @@ String.prototype.variable = function(user, target) {
 }
 
 module.exports.variable = String.prototype.variable;
+
+

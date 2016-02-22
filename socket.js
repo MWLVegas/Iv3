@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 GLOBAL.app = require('express')();
 GLOBAL.http = require('http').Server(app);
 GLOBAL.hio = require('socket.io')(http);
@@ -23,15 +25,25 @@ setTimeout( function() {
   }); }, 2000);
 
 hio.on('connection', function(socket) {
+
   if ( copyoverdat.size != 0 )
   {
     Util.debug("Requesting copyover info.");
     socket.emit('copyoverlogin','');
   }
+  else
+  {
+    socket.emit('info',config.greeting.color(true));
+  }
+
   player[socket.id] = new character(socket);
-  socket.emit('info',config.greeting.color(true));
 
   Util.announce(socket);
+
+  socket.on('nocopyover', function(msg) { 
+        socket.emit('info',config.greeting.color(true));
+
+  });
 
   socket.on('error', function (err) {     console.error(err.stack);   });
   socket.on('disconnect', function() {
@@ -88,12 +100,14 @@ hio.on('connection', function(socket) {
       }
       else
       {
+        socket.emit('info',config.greeting.color(true));
         Util.info("No Match " + copyoverdat[info.id] + " : " + info.name );
         return;
       }
     }
     else
     {
+      socket.emit('info',config.greeting.color(true));
       Util.info("Copyover data does not match.");
       return;
     }

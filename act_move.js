@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 var doNorth = function(socket, msg )
 {
   if ( !canMove(socket,"north") )

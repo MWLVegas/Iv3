@@ -4,9 +4,26 @@ var doWho = function(socket,msg) {
 
   Util.msg(socket, "<br />##3C3======================", "info");
   var count = 0;
-  for ( var x in player )
+
+  var order = [];
+
+  for ( var x in  player )
   {
     if ( player[x].state == 4)
+    {
+      order.push(x);
+    }
+  }
+
+  order.sort( function(b,a) { return player[a].level - player[b].level});
+
+  Util.debug(order);
+
+  for ( var y in order )
+  {
+    var x = order[y];
+    Util.debug("Checking " + x);
+   if ( player[x].state == 4)
     {
       count++;
       var str = "[%*$-3$ %*$10$] %*".toString();

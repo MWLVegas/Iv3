@@ -138,7 +138,7 @@ module.exports.lengthFormat = Number.prototype.lengthFormat;
 
 String.prototype.variable = function(user, target) {
 
-  var   str = this;
+  var str = this;
 
   str = str.replace(/\$n/g, user);
   str = str.replace(/\$m/g, "him");

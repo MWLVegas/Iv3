@@ -177,6 +177,10 @@ i
     }
   });
 
+  socket.on('ping', function() {
+        socket.emit('pong');
+          });
+
   socket.on('copyoverlogin', function(data) {
     var info;
     try {

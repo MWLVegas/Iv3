@@ -35,7 +35,7 @@ var checkCommand = function(data, socket)
           {
           social = act_comm.isSocial(cmd + " " + data, socket,  null);
           }
-          Util.debug("Social: " + social + " Data: " + data);
+//          Util.debug("Social: " + social + " Data: " + data);
           callback(social,callback);
         },
         function(arg,callback) {
@@ -62,7 +62,7 @@ var checkCommand = function(data, socket)
             return;
           }
           else {
-            Util.debug("Social found.");
+ //           Util.debug("Social found.");
           }
 
 

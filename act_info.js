@@ -17,12 +17,11 @@ var doWho = function(socket,msg) {
 
   order.sort( function(b,a) { return player[a].level - player[b].level});
 
-  Util.debug(order);
 
   for ( var y in order )
   {
     var x = order[y];
-    Util.debug("Checking " + x);
+//    Util.debug("Checking " + x);
    if ( player[x].state == 4)
     {
       count++;

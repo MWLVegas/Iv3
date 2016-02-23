@@ -62,7 +62,7 @@ var isSocial = function(msg, socket, channel) {
   if ( msg.charAt(0) != "/" )
     return false;
 
-  Util.debug("Social Received Data: " + msg);
+//  Util.debug("Social Received Data: " + msg);
   var data = msg.split(" ");
   var social = data[0].substring(1);
   var target = data[1];
@@ -74,29 +74,33 @@ var isSocial = function(msg, socket, channel) {
       target = undefined;
   }
 
+  var row;
+var t2 = target;
   Util.debug("Target: " + target);
 
   var query = "SELECT * FROM social WHERE name=?;"
-    db.query(query, social, function( err, rows, fields) { 
+    db.query(query, social, function( err, rows, fields, target) { 
       if ( err ) { throw err; return false }
+
+      Util.debug("#1: Target: " + target);
+      Util.debug("T2: " + t2);
 
       if ( rows.length == 0 )
       {
         return false;
       }
 
-      for ( var x in rows ) 
-      {
+        row = rows[0];
 
-          var cnoarg = rows[x].char_no_arg;
-                var onoarg = rows[x].others_no_arg;
+          var cnoarg = row.char_no_arg;
+          var onoarg = row.others_no_arg;
 
-                      var cfound = rows[x].char_found;           var ofound = rows[x].others_found;         var vfound = rows[x].vict_found;
+          var cfound = row.char_found;           var ofound = row.others_found;         var vfound = row.vict_found;
+          var char_not_found = row.char_not_found;         var char_self = row.char_auto;         var others_self = row.others_auto;
 
-                            var char_not_found = rows[x].char_not_found;         var char_self = rows[x].char_auto;         var others_self = rows[x].others_auto;
-
-        if ( target == undefined ) // No Target
+        if ( t2 == undefined ) // No Target
         {
+          Util.debug("No Target");
           var name = player[socket.id].name;
           var target = player[socket.id].name;
 
@@ -109,8 +113,9 @@ var isSocial = function(msg, socket, channel) {
             channelChat(socket, onoarg.variable(name,target,name), channel, "others");
           }
         }
-        else if ( player[socket.id].name.toLowerCase() == target.toLowerCase() ) // On Self
+        else if ( player[socket.id].name.toLowerCase() == t2.toLowerCase() || t2.toLowerCase() == "self" ) // On Self
         {
+          Util.debug("On Self: " + target);
           var name = player[socket.id].name;
           var target = player[socket.id].name;
 
@@ -125,11 +130,11 @@ var isSocial = function(msg, socket, channel) {
         }
         else // Targeted
         {
-          Util.debug("Targeted social");
+          Util.debug("Targeted social: " + t2);
           var targid;
           async.waterfall( [ 
               function(callback) { 
-                targid = Util.findTarget(socket, target);
+                targid = Util.findTarget(socket, t2);
                 callback(null,callback);
               },
               function(arg1,callback) { 
@@ -148,11 +153,11 @@ var isSocial = function(msg, socket, channel) {
                   if ( channel == null ) // in room
                   {
                     if ( player[x].id == targid ) // The Target
-                      Util.msg( player[x].sock, vfound.variable(name,target,player[x].name), "chat");
+                      Util.msg( player[x].sock, vfound.variable(name,targ,player[x].name), "chat");
                     else if ( player[x].id == player[socket.id].id ) // The player
-                      Util.msg( player[x].sock, cfound.variable(name,target,player[x].name), "chat");
+                      Util.msg( player[x].sock, cfound.variable(name,targ,player[x].name), "chat");
                     else if ( player[x].id != player[socket.id].id && player[x].id != player[targid].id ) // Everyone else
-                      Util.msg( player[x].sock, ofound.variable(name,target,player[x].name), "chat");
+                      Util.msg( player[x].sock, ofound.variable(name,targ,player[x].name), "chat");
                   }
                   else // Global
                   {
@@ -174,10 +179,9 @@ var isSocial = function(msg, socket, channel) {
               function (err, results ) {
                 Util.debug("Done with social");
               });
-        }
       }
     });
-
+  Util.debug("Target End: " + target);
   return true;
 }
 module.exports.isSocial = isSocial;

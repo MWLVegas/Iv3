@@ -45,7 +45,7 @@ function updateClientBars() {
       continue;
 
 
-    info = ( Number(player[x].hp)/Number(player[x].max_hp))*100 + ":" + (Number(player[x].mana)/Number(player[x].max_mana))*100;
+    info = player[x].hp +":"+ player[x].max_hp + ":" + player[x].mana + ":" + player[x].max_mana;
 
     player[x].sock.emit("barUpdate",info);
 

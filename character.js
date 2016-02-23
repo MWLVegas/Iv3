@@ -43,7 +43,12 @@ var removePlayer = function( character ) {
 
 GLOBAL.classTable = {};
 
-classTable[0] = { name: "Black Mage" };
+var blackmage = { name: "Black Mage",
+  hp: 3,
+  mana: 8
+};
+
+classTable[0] = blackmage;
 //  blackmage: { name: "Black Mage" },
 //  whitemage: { name: "White Mage" },
 //  fighter: { name: "Fighter" },

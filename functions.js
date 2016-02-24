@@ -200,6 +200,8 @@ function loadFunctions() {
     createCommand("push", doPush, 500);
 
     createCommand("olc", olc.doOlc, 500);
+    createCommand("edit", olc.doEdit, 500);
+    createCommand("done", olc.doDone, 500);
 
     createCommand("save", doSave);
 

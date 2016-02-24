@@ -54,6 +54,12 @@ var doCopyover = function(socket, msg) {
         callback(null, stream);
         },
         function(arg,callback) {
+          for ( var x in player )
+          {
+            if ( player[x].state == 4 )
+              save.savePlayer(player[x]);
+          }
+
           Util.info("Saved players. Rebooting.");
           callback(null,callback);
         }], function(err, results ) {

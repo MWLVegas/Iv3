@@ -2,11 +2,29 @@ Util.info(__filename + " loaded.");
 
 
 var savePlayer = function( character ) {
-  var socket = player[character.id].sock;
-  player[character.id].sock = null;
+    if ( player[character.id].name == "Unknown")
+          return;
 
-  if ( player[character.id].name == "Unknown")
-    return;
+    var id = character.id;
+
+  var deleted = [];
+  var deletedinfo = [];
+  deleted.push("sock", "editor", "edit", "id", "state");
+
+//  deleted["sock"] = player[character.id].sock;
+//  deleted["editor"] = player[character.id].editor;
+//  deleted["edit"] = player[character.id].edit;
+
+//  var socket = player[character.id].sock;
+//  Util.delete( player[character.id], sock );
+//  player[character.id].sock = null;
+
+  for ( var x in deleted ) {
+    var y = deleted[x];
+    deletedinfo[x] = player[id][y];
+    delete player[id][y];
+    Util.debug("Deleting " + y + " from " + id);
+  }
 
   var cache = [];
   var json = JSON.stringify(character, function(key, value) {
@@ -21,8 +39,14 @@ var savePlayer = function( character ) {
     return value;
   });
 
+  for ( var x in deleted ) { // Put player elements back
+    var y = deleted[x];
+    Util.debug("Adding " + y + " as " + deletedinfo[x]);
+    player[id][y] = deletedinfo[x];
+  }
+
   //  var json = JSON.stringify(character);
-  player[character.id].sock = socket;
+//  player[character.id].sock = socket;
 
   var query = "UPDATE players SET pfile=?, logoff=? where name=?;";
   db.query(query, [ json, Math.floor(Date.now() / 1000), player[character.id].name ]);

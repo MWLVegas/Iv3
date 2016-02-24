@@ -5,6 +5,11 @@ String.prototype.cap = function() {
 
 module.exports = {
 
+  delete: function( obj, element) {
+    var i = obj.indexOf(element) ;
+      if ( i != -1 )
+        obj.splice(i,1);
+  },
   findTarget: function( socket, target ) {
     for ( var x in player ) {
       if ( player[x].state == 4 && ( player[x].name.toLowerCase() == target.toLowerCase() ||  player[x].name.toLowerCase().startsWith(target.toLowerCase())  ) )

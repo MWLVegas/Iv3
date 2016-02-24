@@ -28,6 +28,9 @@ module.exports = function character(socket) {
 
   this.class = 0;
 
+  this.edit = -1;
+  this.editor = -1;
+
   socket.emit('id', this.id);
   socket.emit('connect', "");
   Util.info("Connect: " + this.ip + " - " + this.id);

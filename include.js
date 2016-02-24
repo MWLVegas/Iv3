@@ -12,7 +12,7 @@ var striptags = require('striptags');
 
 GLOBAL.Util = require('./util.js');
 GLOBAL.Room = require('./room.js');
-GLOBAL.login = require('./login.js');
+//GLOBAL.login = require('./login.js');
 
 GLOBAL.database = require('./database.js');
 GLOBAL.sio = require('./socket.js');

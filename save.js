@@ -23,7 +23,7 @@ var savePlayer = function( character ) {
     var y = deleted[x];
     deletedinfo[x] = player[id][y];
     delete player[id][y];
-    Util.debug("Deleting " + y + " from " + id);
+//    Util.debug("Deleting " + y + " from " + id);
   }
 
   var cache = [];
@@ -41,7 +41,7 @@ var savePlayer = function( character ) {
 
   for ( var x in deleted ) { // Put player elements back
     var y = deleted[x];
-    Util.debug("Adding " + y + " as " + deletedinfo[x]);
+//    Util.debug("Adding " + y + " as " + deletedinfo[x]);
     player[id][y] = deletedinfo[x];
   }
 

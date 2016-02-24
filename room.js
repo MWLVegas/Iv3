@@ -40,15 +40,12 @@ var loadRoom = function(vnum) {
       if ( rows[i].room == undefined )
         continue;
 
-      Util.debug( "Room Info #"+vnum+ " " +  rows[i].room );
-      Util.debug(vnum + " " + JSON.stringify(rooms[vnum]));
+//      Util.debug( "Room Info #"+vnum+ " " +  rows[i].room );
 
       if ( rows[i].room.length != 0 )
       {
       var json = rows[i].room;
       rooms[vnum] = JSON.parse(json);
-//      Util.debug(json);
-//      Util.debug(rooms[vnum].exits);
       }
 
       rooms[vnum].players = {};

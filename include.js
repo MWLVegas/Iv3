@@ -10,9 +10,12 @@ GLOBAL.CronJob = require('cron').CronJob;
 
 var striptags = require('striptags');
 
+GLOBAL.config = require('./config.js');
+
 GLOBAL.Util = require('./util.js');
 GLOBAL.Room = require('./room.js');
 GLOBAL.Mob = require('./mobs.js');
+GLOBAL.Mob = require('./objs.js');
 
 GLOBAL.database = require('./database.js');
 GLOBAL.sio = require('./socket.js');

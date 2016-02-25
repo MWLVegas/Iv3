@@ -114,7 +114,7 @@ var playerFromRoom = function(plr) {
   var vnum = player[plr.id].room;
   var id = player[plr.id].id;
 
-  Util.debug( rooms[vnum].players);
+  Util.debug( "Room: " + vnum + " ID: " + id + " Players: " + rooms[vnum].players);
 
   delete rooms[vnum].players[id];
 

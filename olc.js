@@ -1,5 +1,10 @@
 Util.info(__filename + " loaded.");
 
+
+var room_table = [];
+var mob_table = [];
+var obj_table = [];
+
 var doDone = function( socket, data ) {
   player[socket.id].editor = -1;
   player[socket.id].edit = -1;
@@ -16,7 +21,7 @@ var doEdit = function(socket,data ) {
   }
   data = data.substring(cmd.length).trim();
 
-  if ( data.length == 0 )
+  if ( data.length == 0 && cmd.toLowerCase() != "room" )
   {
     Util.msg(socket,"Invalid ID number");
     return;
@@ -30,16 +35,48 @@ var doEdit = function(socket,data ) {
     case "obj": player[socket.id].editor = 2; break;
   }
 
+  if ( data.startsWith("create") )
+  {
+    var split = data.split(" ");
+    if ( split.length < 2 || Number(split[1]) == "NaN" )
+    {
+      Util.msg(socket,"You must provide an ID to create.");
+      return;
+    }
+
+    num = Number(split[1]);
+    if (  olc_edittable[player[socket.id].editor].list[num] )
+    {
+      Util.msg(socket,"That "+ olc_edittable[player[socket.id].editor].name+" ID already exists.");
+      return;
+    }
+
+
+    if ( player[socket.id].editor == 0 )  // Room Editor 
+         createRoom(num);
+    else if ( player[socket.id].editor == 1 )
+      createMob(num);
+    else if ( player[socket.id].editor == 2 )
+      createObj(num);
+
+    Util.msg(socket, olc_edittable[player[socket.id].editor].name + " ID # " + num + " created.");
+    data = num;
+  }
+
+  if ( data.length == 0 )
+    data = player[socket.id].room;
+    
+
   player[socket.id].edit = Number(data);
   Util.msg(socket,"Entering " + olc_edittable[player[socket.id].editor].name + " editor: ID: " + player[socket.id].edit);
- return;
+  return;
 }
 
 module.exports.doEdit = doEdit;
 
-var room = {name : "Room", num: 0 };
-var mob = {name : "Mob", num: 1 };
-var obj = {name : "Object", num:2};
+var room = {name : "Room", num: 0, table: room_table, list: rooms };
+var mob = {name : "Mob", num: 1, table: mob_table, list: mobindex };
+var obj = {name : "Object", num:2, table: obj_table, list: objindex };
 var olc_edittable = [];
 
 olc_edittable.push(room,mob,obj);
@@ -61,7 +98,6 @@ var doOlc = function(socket, data) {
 
   data = data.substring(cmd.length).trim();
   cmd = cmd.toLowerCase();
-  Util.debug("OLC Cmd: " + cmd);
 
   if ( player[socket.id].edit == -1 || player[socket.id].editor == -1)
   {
@@ -69,23 +105,43 @@ var doOlc = function(socket, data) {
     return;
   }
 
-  for ( var x in olc_table )
-  {
-    if ( olc_table[x].type != player[socket.id].editor )
-      continue;
+  var editor = player[socket.id].editor;
+  var table = olc_edittable[editor].table;
 
-    if ( x == cmd )
+  if ( table == undefined ) {
+    Util.msg(socket,"Something has occurred to break things. Wtg.");
+    return;
+  }
+
+  if ( table[cmd] ) {
+    table[cmd].funct(socket, data);
+    return;
+  }
+  // Not OLC - Check regular commands
+
+    if ( functions.commandList[cmd] )
     {
-      olc_table[cmd].funct(socket, data);
+      if ( player[socket.id].level < functions.commandList[cmd].level )
+      {
+        Util.msg(socket,functions.invalid);
+        return;
+      }
+      functions.commandList[cmd].funct(socket, data);
+      return;
+    }
+    if ( functions.aliasList[cmd] )
+    {
+      functions.checkCommand(functions.aliasList[cmd].alias + " " + data, socket);
       return;
     }
 
-  }
-   Util.msg(socket,"Invalid OLC Command");
+    Util.msg(socket,functions.invalid);
+    return;
+
 };
 
 var doRoomDesc = function(socket, data) {
-  var room =  player[socket.id].room;
+  var room =  player[socket.id].edit;
   rooms[room].desc = data;
   Util.msg(socket,"Description updated.");
 };
@@ -99,7 +155,7 @@ var doRoomRoom = function(socket,dat) {
     return;
   }
 
-  var vnum = player[socket.id].room;
+  var vnum = player[socket.id].edit;
   var toRoom = +info[1];
   var dir = info[0].substring(0,1).toLowerCase();
   var create = info[2];
@@ -163,7 +219,7 @@ var getDir = function(dir) {
 
 var doRoomUnlink = function(socket, dat ) {
   var dir = dat.substring(0,1);
-  var room = player[socket.id].room;
+  var room = player[socket.id].edit;
 
   dir = getDir(dir);
   if ( !goodDir(dir) )
@@ -172,13 +228,15 @@ var doRoomUnlink = function(socket, dat ) {
     return;
   }
 
-  if ( !rooms[room].exit[dir] )
+  Util.debug("ID: " + room + " Dir: " + dir + " Exits: " + JSON.stringify(rooms[room].exits));
+
+  if ( !rooms[room].exits[dir] )
   {
     Util.msg(socket,"That direction doesn't exist.");
     return;
   }
 
-  delete rooms[room].exit[dir];
+  delete rooms[room].exits[dir];
   Util.msg(socket,"Exit deleted.");
 
 }
@@ -192,7 +250,7 @@ var doRoomLink = function(socket,dat) {
     return;
   }
 
-  var vnum = player[socket.id].room;
+  var vnum = player[socket.id].edit;
   var toRoom = +info[1];
   var dir = info[0].substring(0,1).toLowerCase();
   var create = info[2];
@@ -345,18 +403,20 @@ module.exports.loadOLC = loadOLC;
 var loadOLC = function() {
   setTimeout( function() {
 
-    OLCcreateCommand("desc", doRoomDesc, room.num);
-    OLCcreateCommand("link", doRoomLink, room.num);
-    OLCcreateCommand("room", doRoomRoom, room.num);
-    OLCcreateCommand("unlink", doRoomUnlink, room.num);
-    OLCcreateCommand("create", doRoomCreate, room.num);
+    OLCcreateCommand(room_table, "desc", doRoomDesc);
+    OLCcreateCommand(room_table, "link", doRoomLink);
+    OLCcreateCommand(room_table, "room", doRoomRoom);
+    OLCcreateCommand(room_table, "unlink", doRoomUnlink);
+    OLCcreateCommand(room_table, "create", doRoomCreate);
+
+
   }, 1500);
 
 }
 
-function OLCcreateCommand(name, func, type) {
-  //  Util.debug("OLC Command: " + name);
-  olc_table[name] = { name: name, funct: func, type: type };
+function OLCcreateCommand(table, name, func ) {
+  table[name] = { name: name, funct: func };
+  //  olc_table[name] = { name: name, funct: func };
 }
 
 var olc_table = [];

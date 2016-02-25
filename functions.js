@@ -8,8 +8,14 @@ var invalid = "Invalid command.";
 loadFunctions();
 loadAliases();
 
+module.exports.commandList = commandList;
+module.exports.aliasList = aliasList;
+module.exports.invalid = invalid;
+
 var checkCommand = function(data, socket)
 {
+  var orig = data;
+
   if ( socket == undefined )
   {
     Util.debug("No commands from undf socket.");
@@ -40,8 +46,14 @@ var checkCommand = function(data, socket)
         },
         function(arg,callback) {
 
-          if ( social == false) 
+          if ( social == false ) 
           {
+            if ( player[socket.id].edit != -1 ) // check OLC
+            {
+              olc.doOlc(socket,orig);
+              return;
+            }
+
             if ( commandList[cmd] )
             {
               if ( player[socket.id].level < commandList[cmd].level )
@@ -60,6 +72,8 @@ var checkCommand = function(data, socket)
 
             Util.msg(socket,invalid);
             return;
+
+
           }
           else {
  //           Util.debug("Social found.");

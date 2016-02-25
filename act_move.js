@@ -3,37 +3,37 @@ Util.info(__filename + " loaded.");
 var doNorth = function(socket, msg )
 {
   if ( !canMove(socket,"north") )
-      return;
+    return;
 }
 
 var doSouth = function(socket,msg)
 {
-    if ( !canMove(socket,"south") )
-            return;
+  if ( !canMove(socket,"south") )
+    return;
 }
 
 var doEast = function(socket,msg)
 {
-    if ( !canMove(socket,"east") )
-            return;
+  if ( !canMove(socket,"east") )
+    return;
 }
 
 var doWest = function(socket,msg)
 {
-    if ( !canMove(socket,"west") )
-            return;
+  if ( !canMove(socket,"west") )
+    return;
 }
 
 var doUp = function(socket,msg)
 {
-    if ( !canMove(socket,"up") )
-            return;
+  if ( !canMove(socket,"up") )
+    return;
 }
 
 var doDown = function(socket,msg)
 {
-    if ( !canMove(socket,"down") )
-            return;
+  if ( !canMove(socket,"down") )
+    return;
 }
 
 var canMove = function(socket, dir ) {
@@ -74,16 +74,17 @@ var canMove = function(socket, dir ) {
     msg = "to the " + dir;
 
   async.waterfall([ function(callback) {
-  Util.msgroom(vnum, name + " has left " + msg, name);
-  Util.msg(socket,"You leave "+msg);
-  Room.playerFromRoom( socket );
-  callback(null,callback);
+    Util.msgroom(vnum, name + " has left " + msg, name);
+    Util.msg(socket,"You leave "+msg);
+    var stuff = Room.playerFromRoom( socket );
+
+    callback(stuff,callback);
   }, function(arg, callback) {
-  Room.playerToRoom(  socket, toRoom );
-  callback(null,callback)
+    Room.playerToRoom(  socket, toRoom );
+    callback(null,callback)
   }], function( err, results ) { 
-  act_info.doLook( socket, "");
-  return;
+    act_info.doLook( socket, "");
+    return;
   });
 }
 

@@ -7,34 +7,34 @@ module.exports = {
 
   delete: function( obj, element) {
     var i = obj.indexOf(element) ;
-      if ( i != -1 )
-        obj.splice(i,1);
+    if ( i != -1 )
+      obj.splice(i,1);
   },
   findTarget: function( socket, target ) {
-    for ( var x in player ) {
-      if ( player[x].state == 4 && ( player[x].name.toLowerCase() == target.toLowerCase() ||  player[x].name.toLowerCase().startsWith(target.toLowerCase())  ) )
+    for ( var x in sockets ) {
+      if ( sockets[x].state == 4 && ( sockets[x].name.toLowerCase() == target.toLowerCase() ||  sockets[x].name.toLowerCase().startsWith(target.toLowerCase())  ) )
       {
-//        Util.debug("findTarget: Found "+ player[x].name);
-        return x;
+        //        Util.debug("findTarget: Found "+ player[x].name);
+        return sockets[x].id;
       }
     }
 
-//    Util.debug("findTarget: No Target Found");
+    //    Util.debug("findTarget: No Target Found");
     return null;
   },
 
   msgroom: function ( vnum, msg, plr, channel ) {
-//    Util.debug("Room Msg: " + vnum);
-//    Util.debug("Messaging Room : " + vnum + " : " + rooms[vnum].name);
-    for ( var x in player )
+    //    Util.debug("Room Msg: " + vnum);
+    //    Util.debug("Messaging Room : " + vnum + " : " + rooms[vnum].name);
+    for ( var x in sockets )
     {
-      if ( player[x].state != 4 || player[x].room != vnum)
+      if ( sockets[x].state != 4 || sockets[x].room != vnum)
         continue;
 
-      if ( plr != null && player[x].name == plr )
+      if ( plr != null && sockets[x].name == plr )
         continue;
 
-      Util.msg(player[x].sock,msg, channel);
+      Util.msg(sockets[x].socket,msg, channel);
     }
   },
   announce: function( socket ) {
@@ -50,20 +50,20 @@ module.exports = {
 
   msgall: function (string, room, chan ) {
 
-    for ( var x in player )
+    for ( var x in sockets )
     {
-      if ( player[x] != undefined )
+      if ( sockets[x] != undefined )
       {
-        if ( player[x].state == 4 )
+        if ( sockets[x].state == 4 )
         {
           if ( room )
-            if ( player[x].room != room )
+            if ( sockets[x].character.room.room != room )
             {
-//              Util.debug("Not in same room ...");
+              //              Util.debug("Not in same room ...");
               continue;
             }
 
-          Util.msg(player[x].sock,string, chan);
+          Util.msg(sockets[x].socket,string, chan);
         }
       }
     }
@@ -73,7 +73,7 @@ module.exports = {
     return string.charAt(0).toUpperCase() + string.slice(1);
   },
   cmd: function( socket, command, message ) {
-//    Util.debug("Sending " + message + " --- Room: " + command);
+    //    Util.debug("Sending " + message + " --- Room: " + command);
     socket.emit(command,message);
     return;
   },
@@ -148,6 +148,19 @@ module.exports = {
     var dec = crypto.AES.decrypt(data,id);
     dec = dec.toString( crypto.enc.Utf8);
     return dec;
+  },
+  createguid: function() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+   var guid = s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+//   Util.debug("Guid Generated: " + guid);
+   return guid;
   }
+
+
 
 };

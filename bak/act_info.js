@@ -1,15 +1,32 @@
+Util.info(__filename + " loaded.");
 
 var doWho = function(socket,msg) {
 
   Util.msg(socket, "<br />##3C3======================", "info");
   var count = 0;
-  for ( var x in player )
+
+  var order = [];
+
+  for ( var x in  player )
   {
     if ( player[x].state == 4)
     {
+      order.push(x);
+    }
+  }
+
+  order.sort( function(b,a) { return player[a].level - player[b].level});
+
+
+  for ( var y in order )
+  {
+    var x = order[y];
+//    Util.debug("Checking " + x);
+   if ( player[x].state == 4)
+    {
       count++;
-      var str = "[%*$-3$] %*".toString();
-      var arr = [ player[x].level,player[x].name ];
+      var str = "[%*$-3$ %*$10$] %*".toString();
+      var arr = [ player[x].level, classTable[ player[x].class].name, player[x].name ];
       Util.msg(socket, str, "info", arr );
     }
   }
@@ -53,6 +70,12 @@ var doLook = function(socket,msg) {
     if ( player[x] && player[x].id != socket.id )
       info = info + "##CFF&nbsp;&nbsp;&nbsp;&nbsp;"+ player[x].name + " is here. <br />";
   }
+
+  for ( var x in room.mobs_in_room )
+  {
+    info = info + "##CFF&nbsp;&nbsp;&nbsp;&nbsp;" + mobs[room.mobs[vnum]].room+ "<br />";
+  }
+
 
   Util.msg(socket,info);
 };

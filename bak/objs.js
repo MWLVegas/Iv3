@@ -1,15 +1,14 @@
 Util.debug(__filename + " loaded");
 
-GLOBAL.mobindex = {};
-GLOBAL.mobs = {};
-
+GLOBAL.objindex = {};
+/*
 module.exports = function mobindex(id) {
   this.name = "new mob";
   this.desc = "This is a new mob.";
   this.room = "A new mob is here";
   this.level = 0;
 
-  this.id = id;
+  this.id = 0;
 
   this.rank = 0;
   this.gil = 0;
@@ -20,12 +19,6 @@ module.exports = function mobindex(id) {
   this.stats = {};
 
   this.stats.ingame = 0;
-}
-
-var newMob = function(id) {
-  var clone = JSON.parse(JSON.stringify(mobindex[id]));
-  var mob = clone[id];
-  mobs.push(mob);
 }
 
 var loadMob = function(id) {
@@ -87,4 +80,4 @@ var saveMob = function(id) {
 }
 
 module.exports.saveMobs = saveMobs;
-
+*/

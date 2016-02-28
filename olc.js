@@ -86,7 +86,7 @@ olc_edittable[room.num] = room;
 olc_edittable[mob.num] = mob;
 olc_edittable[obj.num] = obj;
 
-var doOlc = function(socket, data) {
+var doOlc = function(character, data) {
   var cmd;
 
   if ( data.indexOf(" ") == -1 )
@@ -99,43 +99,45 @@ var doOlc = function(socket, data) {
   data = data.substring(cmd.length).trim();
   cmd = cmd.toLowerCase();
 
-  if ( player[socket.id].edit == -1 || player[socket.id].editor == -1)
+  if ( character.player.edit == -1 || character.player.editor == -1 )
   {
-    Util.msg(socket,"You are not editing anything.");
+    Util.msg(character.player.socket,"You are not editing anything.");
     return;
   }
 
-  var editor = player[socket.id].editor;
+  Util.debug("Character: " + character.name + " Editor: " + character.player.editor );
+
+  var editor = character.player.editor;
   var table = olc_edittable[editor].table;
 
   if ( table == undefined ) {
-    Util.msg(socket,"Something has occurred to break things. Wtg.");
+    Util.msg(character.player.socket,"Something has occurred to break things. Wtg.");
     return;
   }
 
   if ( table[cmd] ) {
-    table[cmd].funct(socket, data);
+    table[cmd].funct(character.player.socket, data);
     return;
   }
   // Not OLC - Check regular commands
 
     if ( functions.commandList[cmd] )
     {
-      if ( player[socket.id].level < functions.commandList[cmd].level )
+      if ( character.level < functions.commandList[cmd].level )
       {
-        Util.msg(socket,functions.invalid);
+        Util.msg(character.player.socket,functions.invalid);
         return;
       }
-      functions.commandList[cmd].funct(socket, data);
+      functions.commandList[cmd].funct(character, data);
       return;
     }
     if ( functions.aliasList[cmd] )
     {
-      functions.checkCommand(functions.aliasList[cmd].alias + " " + data, socket);
+      functions.checkCommand(functions.aliasList[cmd].alias + " " + data, character);
       return;
     }
 
-    Util.msg(socket,functions.invalid);
+    Util.msg(character.player.socket,functions.invalid);
     return;
 
 };

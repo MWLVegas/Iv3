@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 
 var commandList = [];
 var aliasList = [];
@@ -6,8 +8,14 @@ var invalid = "Invalid command.";
 loadFunctions();
 loadAliases();
 
+module.exports.commandList = commandList;
+module.exports.aliasList = aliasList;
+module.exports.invalid = invalid;
+
 var checkCommand = function(data, socket)
 {
+  var orig = data;
+
   if ( socket == undefined )
   {
     Util.debug("No commands from undf socket.");
@@ -25,23 +33,57 @@ var checkCommand = function(data, socket)
   data = data.substring(cmd.length).trim();
 
   cmd = cmd.toLowerCase();
-  if ( commandList[cmd] )
-  {
-    if ( player[socket.id].level < commandList[cmd].level )
-    {
-      Util.msg(socket,invalid);
-      return;
-    }
-    commandList[cmd].funct(socket, data);
-    return;
-  }
-  if ( aliasList[cmd] )
-  {
-    checkCommand(aliasList[cmd].alias + " " + data, socket);
-    return;
-  }
 
-  Util.msg(socket,invalid);
+    var social = false;
+    async.waterfall( [
+        function(callback) {
+          if ( cmd.substring(0,1) == "/" )
+          {
+          social = act_comm.isSocial(cmd + " " + data, socket,  null);
+          }
+//          Util.debug("Social: " + social + " Data: " + data);
+          callback(social,callback);
+        },
+        function(arg,callback) {
+
+          if ( social == false ) 
+          {
+            if ( player[socket.id].edit != -1 ) // check OLC
+            {
+              olc.doOlc(socket,orig);
+              return;
+            }
+
+            if ( commandList[cmd] )
+            {
+              if ( player[socket.id].level < commandList[cmd].level )
+              {
+                Util.msg(socket,invalid);
+                return;
+              }
+              commandList[cmd].funct(socket, data);
+              return;
+            }
+            if ( aliasList[cmd] )
+            {
+              checkCommand(aliasList[cmd].alias + " " + data, socket);
+              return;
+            }
+
+            Util.msg(socket,invalid);
+            return;
+
+
+          }
+          else {
+ //           Util.debug("Social found.");
+          }
+
+
+          callback(null,callback);
+        } ], function( err, results ) {
+
+        });
 }
 
 module.exports.checkCommand = checkCommand;
@@ -59,32 +101,23 @@ var doSay = function (socket, msg) {
 
 var doQuit = function (socket, msg) {
 
-  save.savePlayer(socket);
-  character.removePlayer( player[socket.id] );
-  socket.emit("disconnect","Goodbye!");
-//  character.remotePlayer( player[socket.id] );
-//  socket.disconnect();
+
+  async.waterfall( [ 
+      function(callback) { 
+  save.savePlayer( player[socket.id]);
+  Util.msg(socket,"Saving!");
+  callback(null, callback);
+      },
+      function(arg, callback) { 
+  //  character.removePlayer( player[socket.id] );
+  Util.msgroom( player[socket.id].room, player[socket.id].name + " slowly fades out of sight.", player[socket.id].name);
+  socket.emit("disco","disco");
+  callback(null,callback) } ], function( err, results) { Util.debug("Player has quit"); });
+
+//  setTimeout( function() { character.removePlayer( player[socket.id] ); }, 10);
+  //  socket.disconnect();
 };
 
-var doOoc = function( socket,msg) {
-  if ( msg.trim().length == 0 )
-  {
-    Util.msg(socket,"OOC what?");
-    return;
-  }
-
-  Util.msgall( "##19B[##BBBOOC##19B] ##EEE" + player[socket.id].name + ": "+msg.forChat(), null, "chat");
-};
-
-var doGossip = function( socket,msg) {
-  if ( msg.trim().length == 0 )
-  {
-    Util.msg(socket,"Gossip what?");
-    return;
-  }
-
-  Util.msgall( "##90B(Gossip)##EEE " + player[socket.id].name + ": "+msg.forChat(), null, "chat");
-};
 
 var doSave = function(socket) {
   save.savePlayer( player[socket.id] );
@@ -164,8 +197,8 @@ function loadFunctions() {
     createCommand("down", act_move.doDown);
 
     createCommand("say", doSay);
-    createCommand("ooc", doOoc);
-    createCommand("gossip", doGossip);
+    createCommand("ooc", act_comm.doOOC);
+    createCommand("gossip", act_comm.doGossip);
 
     createCommand("look", act_info.doLook);
     createCommand("whois", act_info.doWhois);
@@ -181,6 +214,8 @@ function loadFunctions() {
     createCommand("push", doPush, 500);
 
     createCommand("olc", olc.doOlc, 500);
+    createCommand("edit", olc.doEdit, 500);
+    createCommand("done", olc.doDone, 500);
 
     createCommand("save", doSave);
 

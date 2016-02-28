@@ -1,12 +1,31 @@
+
 String.prototype.cap = function() {
   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
 }
 
 module.exports = {
 
-  msgroom: function ( vnum, msg, plr ) {
-    Util.debug("Room Msg: " + vnum);
-    Util.debug("Messaging Room : " + vnum + " : " + rooms[vnum].name);
+  delete: function( obj, element) {
+    var i = obj.indexOf(element) ;
+      if ( i != -1 )
+        obj.splice(i,1);
+  },
+  findTarget: function( socket, target ) {
+    for ( var x in player ) {
+      if ( player[x].state == 4 && ( player[x].name.toLowerCase() == target.toLowerCase() ||  player[x].name.toLowerCase().startsWith(target.toLowerCase())  ) )
+      {
+//        Util.debug("findTarget: Found "+ player[x].name);
+        return x;
+      }
+    }
+
+//    Util.debug("findTarget: No Target Found");
+    return null;
+  },
+
+  msgroom: function ( vnum, msg, plr, channel ) {
+//    Util.debug("Room Msg: " + vnum);
+//    Util.debug("Messaging Room : " + vnum + " : " + rooms[vnum].name);
     for ( var x in player )
     {
       if ( player[x].state != 4 || player[x].room != vnum)
@@ -15,7 +34,7 @@ module.exports = {
       if ( plr != null && player[x].name == plr )
         continue;
 
-      Util.msg(player[x].sock,msg);
+      Util.msg(player[x].sock,msg, channel);
     }
   },
   announce: function( socket ) {
@@ -40,7 +59,7 @@ module.exports = {
           if ( room )
             if ( player[x].room != room )
             {
-              Util.debug("Not in same room ...");
+//              Util.debug("Not in same room ...");
               continue;
             }
 
@@ -54,7 +73,7 @@ module.exports = {
     return string.charAt(0).toUpperCase() + string.slice(1);
   },
   cmd: function( socket, command, message ) {
-    Util.debug("Sending " + message + " --- Room: " + command);
+//    Util.debug("Sending " + message + " --- Room: " + command);
     socket.emit(command,message);
     return;
   },

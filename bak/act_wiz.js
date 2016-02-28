@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 //var Util = require('./util.js');
 GLOBAL.copyoverdat = {};
 
@@ -52,6 +54,12 @@ var doCopyover = function(socket, msg) {
         callback(null, stream);
         },
         function(arg,callback) {
+          for ( var x in player )
+          {
+            if ( player[x].state == 4 )
+              save.savePlayer(player[x]);
+          }
+
           Util.info("Saved players. Rebooting.");
           callback(null,callback);
         }], function(err, results ) {
@@ -86,6 +94,42 @@ var doAsave = function(socket,msg) {
 
 }
 
+var doLoad = function(socket,msg) {
+  if ( data.indexOf(" ") == -1 )
+        cmd = data.toString().trim();
+    else
+        {
+              cmd = data.substring(0,data.indexOf(" "));
+                }
+      data = data.substring(cmd.length).trim();
+
+        cmd = cmd.toLowerCase();
+
+        if ( Number(data) == "NaN" ) {
+          Util.msg(socket,"You must provide a valid ID to load.");
+          return;
+        }
+      
+        data = Number(data);
+
+        if ( cmd == "mob" ) { // Load Mob
+          if ( !mobindex[data] ) {
+            Util.msg(socket,"That mob index does not exist.");
+            return;
+          }
+
+          var mob = mobs.newMob(data);
+
+        }
+        else if ( cmd == "obj" ) { // load obj
+        }
+        else {
+          Util.msg(socket,"Invalid load type.");
+          return;
+        }
+}
+
+module.exports.doLoad = doLoad;
 module.exports.doCopyover = doCopyover;
 module.exports.recoverCopyover = recoverCopyover;
 module.exports.doAsave = doAsave;

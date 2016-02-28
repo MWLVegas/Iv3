@@ -5,12 +5,23 @@ GLOBAL.http = require('http').Server(app);
 GLOBAL.hio = require('socket.io')(http);
 
 GLOBAL.sockets = {};
-GLOBAL.player = {};
+GLOBAL.characters = [];
+GLOBAL.players = [];
+GLOBAL.mobs = [];
 
 GLOBAL.port = 6662;
 GLOBAL.listenport = 6661;
 
-GLOBAL.server = net.createServer(newSocket);
+//GLOBAL.server = net.createServer(newSocket);
+//
+
+GLOBAL.server = net.createServer( function(c) {
+  console.log("Server connceted");
+  c.on('end', function() {
+    console.log('server disconnected');
+  });
+  c.pipe(c);
+});
 
 
 app.get('/', function(req, res){
@@ -33,14 +44,24 @@ hio.on('connection', function(socket) {
   }
   else
   {
+    Util.debug("Con: Sending greeting");
     socket.emit('info',config.greeting.color(true));
   }
 
-  player[socket.id] = new character(socket);
+  var sock = new includes.Socket(socket); 
+  sock.character = new includes.Character(socket);
+  sock.player = new includes.Player(socket);
+
+  sock.character.player = sock.player;
+  sock.character.player["socket"] = socket;
+  sock.player.character = sock.character;
+
+  sockets[socket.id] = sock;
 
   Util.announce(socket);
 
   socket.on('nocopyover', function(msg) { 
+    Util.debug("No copyover info: Sending greeting");
     socket.emit('info',config.greeting.color(true));
   });
 
@@ -52,8 +73,9 @@ hio.on('connection', function(socket) {
 
     async.waterfall([
         function(callback) {
-          player[socket.id].id = socket.id.toString();
-          socket.emit("id", player[socket.id].id);
+          sockets[socket.id].id = socket.id;
+
+          socket.emit("id", sockets[socket.id].id);
           var query = "SELECT name,passwd FROM players WHERE name=?";
           db.query(query, name, function( err, rows, fields ) {
             if (err) throw err;
@@ -67,24 +89,28 @@ hio.on('connection', function(socket) {
             }
 
             for ( var i in rows ) {
-              if ( typeof( rows[i]) == "function" )
-              {
-                Util.debug("Function: " + JSON.stringify(rows[i]));
-                return;
-              }
+              sockets[socket.id].player.pass = rows[i].passwd;
+              sockets[socket.id].player.name = rows[i].name;
+              sockets[socket.id].name = rows[i].name;
 
-              player[socket.id].pass = rows[i].passwd;
-              player[socket.id].name = rows[i].name;
-              if ( pass == player[socket.id].pass ) {
-                socket.emit("id", player[socket.id].id);
+              if ( pass == sockets[socket.id].player.pass ) {
+                socket.emit("id", socket.id);
 
-                player[socket.id].name = name.cap();
-                   save.loadPlayer( player[socket.id] );
-                socket.emit('copyoversuccess', player[socket.id].name);
-                Util.msgall(player[socket.id].name + " has connected.", null, "chat");
+                loginPlayer( socket.id )
+                  /*
+                     player[socket.id].name = name.cap(); //remove
+                     sockets[socket.id].character.name = name.cap();
 
-                setTimeout(function() { sio.state(socket,4); act_info.doLook(socket,""); },10);
-i
+                     save.loadPlayer( socket.id ); //remove
+                  //                save.loadPlayer( sockets[socket.id].player );
+
+                  socket.emit('copyoversuccess', player[socket.id].name);
+                  Util.msgall(player[socket.id].name + " has connected.", null, "chat"); // remove
+                  Util.msgall(sockets[socket.id].name + " has connected.", null, "chat");
+
+                  setTimeout(function() { sio.state(socket,4); act_info.doLook( sockets[socket.id].character,""); },10);
+                   *
+                   * */
               }
               else
               {
@@ -100,7 +126,7 @@ i
   });
 
   socket.on('formcreate', function(msg) {
-        Util.debug("Login received: " + msg );
+    Util.debug("Create Login received: " + msg );
 
     var data = msg.split("::");
     var name = data[0];
@@ -134,147 +160,165 @@ i
           if ( !okayname ) { socket.emit('loginmsg','That name is already in use. Try again.'); return; }
           socket.emit("id", player[socket.id].id);
 
-          player[socket.id].name = name.cap();
-          player[socket.id].pass = pass;
-          player[socket.id].email = email;
-          Util.info("New character: " + player[socket.id].name);
-          socket.emit('copyoversuccess', player[socket.id].name);
-          var post = {name: player[socket.id].name, passwd: pass };
+          sockets[socket.id].character.name = name.cap();
+          sockets[socket.id].player.pass = pass;
+          sockets[socket.id].player.email = email;
+
+          player[socket.id].name = name.cap(); //remove
+          player[socket.id].pass = pass; //remove
+          player[socket.id].email = email; //remove
+
+          Util.info("New character: " + sockets[socket.id].character.name); //player[socket.id].name);
+          socket.emit('copyoversuccess', sockets[socket.id].character.name); //player[socket.id].name);
+          var post = {guid: sockets[socket.id].guid, name: sockets[socket.id].character.name, passwd: pass }; //player[socket.id].name, passwd: pass };
           var query = "INSERT INTO players SET ?;";
           db.query(query,post);
           Util.msg(socket,"Welcome aboard!");
-          Util.msgall(player[socket.id].name + " has begun adventuring on Ivalice!", null, "chat");
+          loginPlayer( socket.id );
+  });
+});
 
-          setTimeout(function() { sio.state(socket,4) },10);
+
+socket.on('error', function (err) {     console.error(err.stack);   });
+socket.on('disconnect', function() {
+
+  for ( var x in sockets ) {  //fix dis
+    if ( sockets[x].socket != socket )
+      continue;
+
+    async.waterfall([
+        function(callback) { 
+          save.savePlayer( sockets[x].character );
+          callback(null,callback);
+        },
+        function(arg1,callback) { 
+          if ( sockets[socket.id].state == 4 )
+          {
+            Util.msgall(sockets[socket.id].name + " has lost connection.",null, "chat");
+          }
+          Util.info("Disconnected: " + sockets[x].name + " - " + sockets[x].ip);
+          callback(null,callback);
+
+        } ], function (err, results) { 
+          //Util.debug("Removing " + player[socket.id].name);
+          delete sockets[x];
         });
+  }
+});
+
+socket.on('ping', function() {
+  socket.emit('pong');
+});
+
+socket.on('copyoverlogin', function(data) {
+  var info;
+  try {
+    info = (data);
+  }
+  catch (e) {
+    Util.info("Error reading JSON info: " + JSON.stringify(data));
     return;
-  });
+  }
 
+  data = JSON.stringify(data);
 
-  socket.on('error', function (err) {     console.error(err.stack);   });
-  socket.on('disconnect', function() {
-
-    for ( var x in player ) { 
-      if ( player[x].sock != socket )
-        continue;
-
-      async.waterfall([
-          function(callback) { save.savePlayer(player[socket.id]); 
-            callback(null,callback);
-          },
-          function(arg1,callback) { 
-            if ( player[socket.id].state == 4 )
-            {
-              Util.msgall(player[socket.id].name + " has disconnected.",null, "chat");
-            }
-            Util.info("Disconnected: " + player[socket.id].name + " - " + player[socket.id].ip);
-            callback(null,callback);
-
-          } ], function (err, results) { 
-            //Util.debug("Removing " + player[socket.id].name);
-            delete player[socket.id];
-          });
-    }
-  });
-
-  socket.on('ping', function() {
-        socket.emit('pong');
-          });
-
-  socket.on('copyoverlogin', function(data) {
-    var info;
-    try {
-      info = (data);
-    }
-    catch (e) {
-      Util.info("Error reading JSON info: " + JSON.stringify(data));
-      return;
-    }
-
-    data = JSON.stringify(data);
-
-    Util.info("Copyover Login received: " + data);
-    if ( copyoverdat[info.id] )
+  Util.info("Copyover Login received: " + data);
+  if ( copyoverdat[info.id] )
+  {
+    if ( copyoverdat[info.id] == info.name )
     {
-      if ( copyoverdat[info.id] == info.name )
-      {
-        Util.info("Copyover Data Match");
-        player[socket.id].name = info.name;
-        Util.msg(socket,"Automatically logged in ... Welcome back, " + info.name);
-        save.loadPlayer( player[socket.id] );
-        Util.msgall(player[socket.id].name + " has reconnected!", null, "chat");
-        socket.emit('copyoversuccess', player[socket.id].name);
-        setTimeout(function() { sio.state(socket,4) },10);
-        delete copyoverdat[info.id];
-        return;
-      }
-      else
-      {
-        socket.emit('info',config.greeting.color(true));
-        Util.info("No Match " + copyoverdat[info.id] + " : " + info.name );
-        return;
-      }
+      Util.debug("Copyover Data Match");
+      sockets[socket.id].name = info.name;
+      sockets[socket.id].id = socket.id;
+      //Util.msg(socket,"Automatically logged in ... Welcome back, " + info.name);
+      Util.debug("Copyover login match : " + info.name + " " + socket.id);
+      loginPlayer(socket.id);
+      /*        save.loadPlayer( socket.id );
+      //        save.loadPlayer( sockets[socket.id].player );
+
+      Util.msgall( sockets[socket.id].character.name + " materializes.", null, "chat");
+      socket.emit('copyoversuccess', sockets[socket.id].character.name); //player[socket.id].name);
+      setTimeout(function() { sio.state(socket,4) },10);
+      */
+      delete copyoverdat[info.id];
+      return;
     }
     else
     {
       socket.emit('info',config.greeting.color(true));
-      Util.info("Copyover data does not match.");
+      //        Util.info("No Match " + copyoverdat[info.id] + " : " + info.name );
       return;
     }
+  }
+  else
+  {
+    Util.debug("No copyover match");
+    sockets[socket.id].state = 0;
+    Util.debug("Sending greeting");
+    socket.emit('info',config.greeting.color(true));
+    Util.debug("Greeting sent.");
+  }
 
+  return;
+});
+
+socket.on('input',function(data) {
+  var user = data.substr(0,data.indexOf("~"));
+  var msg  = data.substr(user.length+1).trim();
+  var pass = "";
+  //    Util.debug("User: " + user + " Msg: " + msg);
+  //
+
+  if ( sockets[socket.id].state != 4 )
     return;
-  });
 
-  socket.on('input',function(data) {
-    var user = data.substr(0,data.indexOf("~"));
-    var msg  = data.substr(user.length+1).trim();
-    var pass = "";
-//    Util.debug("User: " + user + " Msg: " + msg);
-//
+  //    if ( player[socket.id].state != 4 )
+  //      return;
 
-    if ( player[socket.id].state != 4 )
-      return;
+  //    functions.checkCommand(msg,socket);
+  functions.checkCommand(msg, sockets[socket.id].character);
 
-    functions.checkCommand(msg,socket);
-
-  });
-  socket.on('info', function(msg) {
-    hio.emit('info',msg);
-  });
+});
+socket.on('info', function(msg) {
+  hio.emit('info',msg);
+});
 
 });
 
 function closeSocket(socket) {
-  var i = sockets.indexOf(socket);
-  if (i != -1) {
-    sockets.splice(i, 1);
+
+  for ( var x in sockets )
+  {
+    if ( sockets[x].sock == sock )
+    {
+      socket.splice(x,1);
+      return;
+    }
+
   }
+  Util.error("Socket not found in socket list");
+
+  //  var i = sockets.indexOf(socket);
+  //  if (i != -1) {
+  //    sockets.splice(i, 1);
+  //  }
+
 }
 
-function newSocket(socket) {
-  sockets.push(socket);
-  socket.on('data', function(data) {
-    receiveData(socket, data);
+function newSocket(soc) {
+  var sock = new Socket();
+  sock.socket = soc;
+  sock.id = soc.id;
+
+  sockets.push(sock);
+  soc.on('connect', function() {
+    Util.debug("connected.");
+  });
+  soc.on('end', function() {
+    closeSocket(soc);
   })
-  socket.on('end', function() {
-    closeSocket(socket);
+  soc.on('error',function(err) {
   })
-  socket.on('error',function(err) {
-  })
-}
-
-function cleanInput(data) {
-  return data.toString().replace(/(\r\n|\n|\r)/gm,"");
-}
-
-function receiveData(socket, data) {
-  var cleanData = cleanInput(data);
-  //console.log(data);
-  process(cleanData);
-}
-
-function process(data) {
-  Util.info(data);
 }
 
 function isValidName(name) {
@@ -293,25 +337,60 @@ function isValidName(name) {
   return true;
 }
 
-module.exports = {
-  state : function(socket,state) {
-    player[socket.id].state = state;
-    socket.emit('state', state);
-    Util.debug("Updating " + player[socket.id].id  + " to " + state);
+var state = function(socket,state) {
+  socket.emit('state', state);
+  Util.debug("Updating " + socket.id  + " to " + state);
 
-    if ( state == 4 )
+  if ( state == 4 )
+  {
+    for ( var x in sockets )
     {
-      for ( var x in player )
+      if ( sockets[x].id != x && sockets[socket.id].name == sockets[x].name )
       {
-        if ( player[x].id != player[socket.id].id && player[socket.id].name == player[x].name )
-        {
-          var sock = player[x].sock;
-          Util.msg(sock,"Another connection has overriden this one.");
-          sock.disconnect();
-        }
+        var sock = sockets[socket.id].socket;
+        Util.msg(sock,"Another connection has overriden this one.");
+        sock.disconnect();
       }
     }
-
   }
+
+  sockets[socket.id].state = state;
+  sockets[socket.id].player.state = state;
+
+
 }
+module.exports.state = state;
+
+function loginPlayer( id )
+{
+  //sockets[socket.id].character.name = name.cap();
+Util.debug("LoginPlayer: " + id);
+  var found = false;
+
+  save.loadPlayer( id ); 
+  sockets[id].socket.emit('copyoversuccess', sockets[id].name);
+
+  for ( var x in characters )
+  {
+    if ( characters[x].name == sockets[id].name ) // Reconnection
+    {
+      characters.splice(x,1);
+      Util.debug("Character found in list- removing");
+      Util.msgall( sockets[id].character.name + " has reconnected.", null, "chat");
+      found = true;
+      break;
+    }
+  }
+
+  characters.push( sockets[id].character );
+
+  if ( !found )
+  {
+    Util.msgall(sockets[id].name + " has connected.", null, "chat");
+  }
+
+  setTimeout(function() { sio.state( sockets[id].socket,4); act_info.doLook( sockets[id].character,""); },10);
+  Util.debug("Character logged in.");
+}
+
 

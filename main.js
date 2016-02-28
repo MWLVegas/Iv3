@@ -1,6 +1,5 @@
 
-
-require("./include.js");
+GLOBAL.includes = require("./include.js");
 Util.info(__filename + " loaded.");
 
 async.waterfall([
@@ -11,7 +10,7 @@ async.waterfall([
     },
     function(arg, callback) {
       setTimeout( function() { 
-      Room.loadRooms();
+      Rooms.loadRooms();
       callback(null, callback); }, 2500);
     },
     function(arg,callback) {

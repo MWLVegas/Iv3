@@ -2,15 +2,6 @@ Util.info(__filename + " loaded.");
 
 GLOBAL.rooms = {};
 
-var newRoom = function(vnum) {
-  this.vnum = vnum;
-  this.name = "";
-  this.area = "Void";
-  this.desc = "";
-  this.players = {};
-  this.exits = {};
-}
-
 var saveRoom = function(room) {
   var r = rooms[room];
 
@@ -35,22 +26,24 @@ var loadRoom = function(vnum) {
 
     for ( var i in rows ) {
 
-      rooms[vnum] = new newRoom(vnum);
+      rooms[vnum] = new includes.Room(vnum);//newRoom(vnum);
       rooms[vnum].vnum = vnum;
       if ( rows[i].room == undefined )
         continue;
 
-//      Util.debug( "Room Info #"+vnum+ " " +  rows[i].room );
+      Util.debug( "Room Info #"+vnum+ " " +  rows[i].room );
 
       if ( rows[i].room.length != 0 )
       {
-      var json = rows[i].room;
-      rooms[vnum] = JSON.parse(json);
+        var json = JSON.parse(rows[i].room);
+        for ( var x in json )
+        {
+          rooms[vnum][x] = json[x];
+        }
+//        rooms[vnum] = JSON.parse(json);
       }
 
-      rooms[vnum].players = {};
-
-      rooms[vnum].name = rows[i].name;
+     rooms[vnum].name = rows[i].name;
       rooms[vnum].area = rows[i].area;
     }
 
@@ -81,28 +74,33 @@ var playerToRoom = function(plr, room) {
   if ( room == -1 )
     room = 1;
 
- Util.debug("Adding player to room " + room);
+ Util.debug("Adding " + plr.name + " to room " + room);
 
  async.waterfall([
      function(callback) {
 
-  if ( player[plr.id].room != -1 )
+  if ( character.room != -1 )
     playerFromRoom(plr);
 
-  if ( rooms[room].players == undefined )
-    rooms[room].players = {};
+  if ( rooms[room].in_room == undefined )
+    rooms[room].in_room = [];
+
   callback(null,callback);
      },
      function (arg, callback) {
-        rooms[room].players[plr.id] = plr.name;
-        player[plr.id].room = room;
+        rooms[room].in_room.push(plr);// = plr.name;
+//        Util.debug("In Room: (to room) " + rooms[room].in_room);
+        plr.room = room;
         callback(null,callback);
      },
      function (arg,callback) {
-       if ( player[plr.id].state == 4 )
-        Util.msgroom( room, player[plr.id].name + " has arrived.", player[plr.id].name);
+       if ( plr.player.state == 4 )
+        Util.msgroom( room, plr.name + " has arrived.", plr.name);
        else
-        Util.msgroom( room, player[plr.id].name + " materializes in a bright flash.", player[plr.id].name);
+        Util.msgroom( room, plr.name + " materializes in a bright flash.", plr.name);
+
+       Util.debug("Plr " + plr.name + " - In Room " + plr.room + " : " + rooms[plr.room].name);
+
         callback(null,callback);
      }], function(err, results ) {
        
@@ -111,22 +109,27 @@ var playerToRoom = function(plr, room) {
 };
 
 var playerFromRoom = function(plr) {
-  var vnum = player[plr.id].room;
-  var id = player[plr.id].id;
+  var vnum = plr.room;
+//  var id = player[plr.id].id;
 
-  Util.debug( "Room: " + vnum + " ID: " + id + " Players: " + rooms[vnum].players);
+  Util.debug("Plr: " + plr.name + " Room: " + plr.room);
 
-  delete rooms[vnum].players[id];
+  if ( !rooms[vnum] ) {
+    Util.debug("Char being removed from invaild room");
+    return;
+  }
 
-  if ( rooms[vnum].players == undefined )
-    rooms[vnum].players = {};
+  Util.debug( "Room: " + vnum + " ID: " + plr.name + " Players: " + rooms[vnum].in_room);
 
-  player[plr.id].room = -1;
+  var x = rooms[vnum].in_room.indexOf(plr);
+  rooms[vnum].in_room.splice(x,1);
+//  delete rooms[vnum].players[id];
+
+  plr.room = -1;
   Util.debug("Player removed from room.");
 };
 
 module.exports.loadRooms = loadRooms;
-module.exports.newRoom = newRoom;
 module.exports.saveRoom = saveRoom;
 module.exports.playerToRoom = playerToRoom;
 module.exports.playerFromRoom = playerFromRoom;

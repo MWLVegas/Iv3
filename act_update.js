@@ -30,24 +30,22 @@ var every_minute = function() {
 };
 
 var every_second = function() {
-
   updateClientBars();
 };
 
 
 
-
-
 function updateClientBars() {
   var info;
-  for ( var x in player ) {
-    if ( player[x].state != 4 )
+
+  for ( var x in sockets ) {
+    if ( sockets[x].state != 4 )
       continue;
 
 
-    info = player[x].hp +":"+ player[x].max_hp + ":" + player[x].mana + ":" + player[x].max_mana;
+    info = sockets[x].character.hp +":"+ sockets[x].character.maxhp+ ":" + sockets[x].character.mana + ":" + sockets[x].character.maxmana;
 
-    player[x].sock.emit("barUpdate",info);
+    sockets[x].socket.emit("barUpdate",info);
 
   }
 

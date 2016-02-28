@@ -1,39 +1,56 @@
 Util.info(__filename + " loaded.");
 
 
-var savePlayer = function( character ) {
-    if ( player[character.id].name == "Unknown")
-          return;
+var savePlayer = function( character  ) {
 
-    var id = character.id;
+  Util.debug("savePlayer: " + character.name);
+
+  var id = character.player.socket.id;
 
   var deleted = [];
   var deletedinfo = [];
-  deleted.push("sock", "editor", "edit", "id", "state");
-
-//  deleted["sock"] = player[character.id].sock;
-//  deleted["editor"] = player[character.id].editor;
-//  deleted["edit"] = player[character.id].edit;
-
-//  var socket = player[character.id].sock;
-//  Util.delete( player[character.id], sock );
-//  player[character.id].sock = null;
+  deleted.push("player");//.socket", "player.character", "player");
 
   for ( var x in deleted ) {
     var y = deleted[x];
-    deletedinfo[x] = player[id][y];
-    delete player[id][y];
-//    Util.debug("Deleting " + y + " from " + id);
+    deletedinfo[x] = character[y];
+    delete character[y];
   }
 
   var cache = [];
-  var json = JSON.stringify(character, function(key, value) {
+  var cfile = JSON.stringify(character, function(key, value) {
     if (typeof value === 'object' && value !== null) {
       if (cache.indexOf(value) !== -1) {
-        // Circular reference found, discard key
         return;
       }
-      // Store value in our collection
+      cache.push(value);
+    }
+    return value;
+  });
+
+
+  for ( var x in deleted ) { // Put player elements back
+    var y = deleted[x];
+    character[y] = deletedinfo[x];
+  }
+  cache = [];
+
+
+  deleted = [];
+  deletedinfo = [];
+  deleted.push("socket", "character", "id", "state", "pass");//.socket", "player.character", "player");
+
+  for ( var x in deleted ) {
+    var y = deleted[x];
+    deletedinfo[x] = character.player[y];
+    delete character.player[y];
+  }
+
+  var pfile = JSON.stringify(character.player, function(key, value) {
+    if (typeof value === 'object' && value !== null) {
+      if (cache.indexOf(value) !== -1) {
+        return;
+      }
       cache.push(value);
     }
     return value;
@@ -41,80 +58,95 @@ var savePlayer = function( character ) {
 
   for ( var x in deleted ) { // Put player elements back
     var y = deleted[x];
-//    Util.debug("Adding " + y + " as " + deletedinfo[x]);
-    player[id][y] = deletedinfo[x];
+    character.player[y] = deletedinfo[x];
   }
 
   //  var json = JSON.stringify(character);
-//  player[character.id].sock = socket;
+  //  player[character.id].sock = socket;
 
-  var query = "UPDATE players SET pfile=?, logoff=? where name=?;";
-  db.query(query, [ json, Math.floor(Date.now() / 1000), player[character.id].name ]);
-  Util.info(player[character.id].name + " saved.");
+  var query = "UPDATE players SET guid=?, cfile=?, pfile=?, logoff=? where name=?;";
+  db.query(query, [ character.guid, cfile, pfile, Math.floor(Date.now() / 1000), character.name ]);
+  Util.info( character.name + " saved.");
 
 };
 
-var loadPlayer = function( character ) {
-  var query = "SELECT pfile FROM players WHERE name=?;";
-  db.query(query, [ player[character.id].name ], function (err, rows, field) {
+var loadPlayer = function( id ) {
+  var query = "SELECT guid, cfile, pfile FROM players WHERE name=?;";
+  Util.debug("loadPlayer: " + sockets[id].name);
+  db.query(query, [ sockets[id].name ], function (err, rows, field) {
     if (err) throw err;
     if ( rows.length == 0 )
     {
-      Util.error("Error reading player file for " + player[character.id].name);
-      Util.msg(character,"There has been an error reading your player file. Report this to Raum.");
+      Util.error("Error reading player file for " + sockets[id].name);
+      Util.msg(character.player.socket,"There has been an error reading your player file. Report this to Raum.");
       return;
     }
     for ( var i in rows ) {
-      if ( rows[i].pfile.length == 0 )
+
+      Util.debug("Guid: " + rows[i].guid);
+      if ( rows[i].guid != null && rows[i].guid != undefined && rows[i].guid.toString().trim().length != 0 )
       {
-        player[character.id].room = 1;
+        sockets[id].guid = rows[i].guid;
+        sockets[id].character.guid = sockets[id].guid;
+      }
+      else
+      {
+        Util.debug("No Guid found - Using premade " + sockets[id].guid);
+        sockets[id].character.guid = sockets[id].guid;
+      }
+
+      if ( rows[i].pfile.length == 0 || rows[i].cfile.length == 0 )
+      {
+        sockets[id].character.room = 1;
+        sockets[id].character.name = sockets[id].name;
         Util.debug("No pfile yet.");
-        savePlayer(character);
+        savePlayer( sockets[id].character);
         return;
 
       }
 
-      var json = rows[i].pfile;
-      var socket = player[character.id].sock;
-      var name = player[character.id].name;
-      var id = player[character.id].id;
-      var state = player[character.id].state;
-
-      player[character.id].sock = null;
-      var loaded = JSON.parse(json);
-      var orig =  player[character.id];
-
+      var cfile = JSON.parse(rows[i].cfile);
+      var pfile = JSON.parse( rows[i].pfile);
 
       async.waterfall( [
           function(callback) {
-            for (var y in loaded ) {
-              var orig = player[id][y];
-              var val = loaded[y];
-              //        Util.debug(y+") Orig: " + orig + " is " + val);
-              player[id][y.toString()] = loaded[y];
+            for (var y in pfile ) {
+              var val = pfile[y];
+              sockets[id].player[y.toString()] = pfile[y];
             }
-            //Util.debug("Stuffs: " + JSON.stringify(player[character.id]) );
+            Util.debug("Pfile loaded");
             callback(null,callback);
 
           },
           function(arg, callback) {
+            for (var y in cfile ) {
+              var val = cfile[y];
+              sockets[id].character[y.toString()] = cfile[y];
+            }
+            Util.debug("cFile loaded");
 
-            // Util.debug("NEW: " +  JSON.stringify(newone) );
-            //      Util.debug("Loaded Type: " + typeof(loaded) + " Old: " + typeof(old) );
-            //      var newArray = loaded.concat(old).unique();
-
-            //      player[character.id] = newone;//newArray; //JSON.parse(json);
-            player[id].sock = socket;
-            player[id].name = name;
-            player[id].id = id;
-            player[id].state = state;
             callback(null,callback);
           }, function(arg, callback) { 
-            var room = player[id].room;
+            var room = sockets[id].character.room;
 
-            player[id].room = -1;
-            Room.playerToRoom(player[id], room);
-          }], function(err,results) {} );  
+            sockets[id].character.room = -1;
+            Rooms.playerToRoom( sockets[id].character, room);
+
+            callback(null,callback);
+          }], function(err,results) {
+          
+            for ( var x in players )
+            {
+              if ( players[x].name == sockets[id].name )
+              {
+                players.splice(x,1);
+                break;
+              }
+            }
+
+            players.push(sockets[id].player);
+
+          } );  
     }
 
   });

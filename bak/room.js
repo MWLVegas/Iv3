@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 GLOBAL.rooms = {};
 
 var newRoom = function(vnum) {
@@ -7,6 +9,7 @@ var newRoom = function(vnum) {
   this.desc = "";
   this.players = {};
   this.exits = {};
+  this.mobs_in_room = [];
 }
 
 var saveRoom = function(room) {
@@ -30,16 +33,20 @@ var loadRoom = function(vnum) {
       Util.error("Error loading room # " + vnum);
       return;
     }
+
     for ( var i in rows ) {
 
       rooms[vnum] = new newRoom(vnum);
       rooms[vnum].vnum = vnum;
+      if ( rows[i].room == undefined )
+        continue;
+
+//      Util.debug( "Room Info #"+vnum+ " " +  rows[i].room );
+
       if ( rows[i].room.length != 0 )
       {
       var json = rows[i].room;
       rooms[vnum] = JSON.parse(json);
-      Util.debug(json);
-      Util.debug(rooms[vnum].exits);
       }
 
       rooms[vnum].players = {};
@@ -47,7 +54,6 @@ var loadRoom = function(vnum) {
       rooms[vnum].name = rows[i].name;
       rooms[vnum].area = rows[i].area;
     }
-    Util.debug("Loaded Room " + vnum);
 
   });
 };
@@ -56,6 +62,7 @@ var saveRooms = function() {
 };
 
 var loadRooms = function() {
+  Util.debug("Loading all rooms.");
   var query = "SELECT vnum FROM rooms WHERE 1";
   db.query(query, function (err, rows, field) {
     if (err) throw err;
@@ -69,7 +76,6 @@ var loadRooms = function() {
     }
   });
 
-  Util.info("Rooms loaded.");
 };
 
 var playerToRoom = function(plr, room) {
@@ -94,7 +100,10 @@ var playerToRoom = function(plr, room) {
         callback(null,callback);
      },
      function (arg,callback) {
+       if ( player[plr.id].state == 4 )
         Util.msgroom( room, player[plr.id].name + " has arrived.", player[plr.id].name);
+       else
+        Util.msgroom( room, player[plr.id].name + " materializes in a bright flash.", player[plr.id].name);
         callback(null,callback);
      }], function(err, results ) {
        
@@ -106,7 +115,7 @@ var playerFromRoom = function(plr) {
   var vnum = player[plr.id].room;
   var id = player[plr.id].id;
 
-  Util.debug( rooms[vnum].players);
+  Util.debug( "Room: " + vnum + " ID: " + id + " Players: " + rooms[vnum].players);
 
   delete rooms[vnum].players[id];
 

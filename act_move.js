@@ -36,10 +36,10 @@ var doDown = function(socket,msg)
     return;
 }
 
-var canMove = function(socket, dir ) {
-  var vnum = player[socket.id].room;
+var canMove = function( character, dir ) {
+  var vnum = character.room;//player[socket.id].room;
 
-  Util.debug("Attempting to move " + dir );
+//  Util.debug("Attempting to move " + dir );
   if ( vnum == -1 ) {
     Util.error("Player tried to move and is not in room!");
     return false;
@@ -55,18 +55,18 @@ var canMove = function(socket, dir ) {
 
   if ( !exits[dir] )
   {
-    Util.msg(socket,"You do not seem to be able to go that way.");
+    Util.msg(character.player.socket,"You do not seem to be able to go that way.");
     return false;
   }
 
   var toRoom = exits[dir];
 
   if ( !rooms[toRoom] ) {
-    Util.msg(socket,"The room you are heading to does not seem to exist.");
+    Util.msg(character.player.socket,"The room you are heading to does not seem to exist.");
     return false;
   }
 
-  var name = player[socket.id].name;
+  var name = character.name;//player[socket.id].name;
   var msg;
   if ( dir == "up" || dir == "down" )
     msg = dir + "wards";
@@ -75,15 +75,15 @@ var canMove = function(socket, dir ) {
 
   async.waterfall([ function(callback) {
     Util.msgroom(vnum, name + " has left " + msg, name);
-    Util.msg(socket,"You leave "+msg);
-    var stuff = Room.playerFromRoom( socket );
+    Util.msg(character.player.socket,"You leave "+msg);
+    var stuff = Rooms.playerFromRoom( character );
 
     callback(stuff,callback);
   }, function(arg, callback) {
-    Room.playerToRoom(  socket, toRoom );
+    Rooms.playerToRoom( character, toRoom );
     callback(null,callback)
   }], function( err, results ) { 
-    act_info.doLook( socket, "");
+    act_info.doLook( character, "");
     return;
   });
 }

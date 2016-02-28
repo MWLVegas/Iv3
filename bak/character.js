@@ -1,3 +1,5 @@
+Util.info(__filename + " loaded.");
+
 
 module.exports = function character(socket) {
 
@@ -7,7 +9,7 @@ module.exports = function character(socket) {
   this.sock = socket;
   this.id = socket.id.toString();//.substring(2);
   this.state = 0;
-  this.room = -1;
+  this.room = 1;
   this.pass = "";
 
   this.inventory;
@@ -18,6 +20,17 @@ module.exports = function character(socket) {
   this.exp = 0;
   this.level = 1;
 
+  this.hp = 20;
+  this.mana = 20;
+
+  this.max_hp = 20;
+  this.max_mana = 20;
+
+  this.class = 0;
+
+  this.edit = -1;
+  this.editor = -1;
+
   socket.emit('id', this.id);
   socket.emit('connect', "");
   Util.info("Connect: " + this.ip + " - " + this.id);
@@ -25,8 +38,25 @@ module.exports = function character(socket) {
 }
 
 var removePlayer = function( character ) {
+  if ( player[character] )
+  {
   Room.playerFromRoom( player[character.id] );
+  }
 }
+
+GLOBAL.classTable = {};
+
+var blackmage = { name: "Black Mage",
+  hp: 3,
+  mana: 8
+};
+
+classTable[0] = blackmage;
+//  blackmage: { name: "Black Mage" },
+//  whitemage: { name: "White Mage" },
+//  fighter: { name: "Fighter" },
+//  thief: { name: "Thief" }
 
 
 module.exports.removePlayer = removePlayer;
+//module.exports.classTable = classTable;

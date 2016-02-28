@@ -10,9 +10,13 @@ GLOBAL.CronJob = require('cron').CronJob;
 
 var striptags = require('striptags');
 
-GLOBAL.Room = require('./room.js');
-GLOBAL.login = require('./login.js');
+GLOBAL.config = require('./config.js');
+
 GLOBAL.Util = require('./util.js');
+GLOBAL.Room = require('./room.js');
+GLOBAL.Mob = require('./mobs.js');
+GLOBAL.Mob = require('./objs.js');
+
 GLOBAL.database = require('./database.js');
 GLOBAL.sio = require('./socket.js');
 GLOBAL.functions = require('./functions.js');
@@ -25,6 +29,7 @@ GLOBAL.act_wiz = require('./act_wiz.js');
 GLOBAL.act_move = require('./act_move.js');
 GLOBAL.olc = require('./olc.js');
 GLOBAL.act_update = require('./act_update.js');
+GLOBAL.act_comm = require('./act_comm.js');
 
 String.prototype.cap = function() {
   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
@@ -86,7 +91,6 @@ String.prototype.forChat = function () {
   var str = this.trim();
   var str = this.replace(/\<3/g,":heart:");
   str = str.striptag(bannedTags);
-
   return applyEmotesFormat(str);
 }
 module.exports.forChat = String.prototype.forChat;
@@ -134,4 +138,82 @@ Number.prototype.lengthFormat = function() {
 };
 
 module.exports.lengthFormat = Number.prototype.lengthFormat;
+
+String.prototype.variable = function(user, target) {
+
+  var str = this;
+
+  str = str.replace(/\$n/g, user);
+  str = str.replace(/\$m/g, "him");
+  str = str.replace(/\$s/g, "his");
+  str = str.replace(/\$e/g, "he");
+
+  str = str.replace(/\$N/g, target);
+  str = str.replace(/\$M/g, "him");
+  str = str.replace(/\$S/g, "his");
+  str = str.replace(/\$E/g, "he");
+
+
+  return str;
+}
+
+module.exports.variable = String.prototype.variable;
+
+function Character() {
+  this.name = "";
+  this.short_desc = "";
+  this.long_desc = "";
+
+  this.isnpc = false;
+
+  this.hp = 0;
+  this.maxhp = 0;
+  this.mana = 0;
+  this.maxmana = 0;
+
+  this.room = -1;
+
+  this.level = 0;
+  this.gil = 0;
+  this.exp = 0;
+
+  this.mob = null;
+  this.player = null;
+
+  this.job = 0;
+}
+
+function Room(id) {
+  this.id = id;
+  this.name = "New Room";
+  this.area = "";
+  this.desc = "";
+
+  this.exits = {};
+  this.in_room = [];
+  this.obj_in_room = [];
+}
+
+function Mob(id) {
+  this.index = -1;
+}
+
+function Player(id) {
+  this.socket = null;
+  this.id = null;
+  this.pass = "";
+  this.account = "";
+  this.orig_name = "";
+  this.title = "";
+
+  this.editor = -1;
+  this.edit = -1;
+}
+
+module.exports.Room = Room;
+module.exports.Mob = Mob;
+module.exports.Character = Character;
+module.exports.Player = player;
+
+
 

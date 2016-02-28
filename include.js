@@ -11,11 +11,12 @@ GLOBAL.CronJob = require('cron').CronJob;
 var striptags = require('striptags');
 
 GLOBAL.config = require('./config.js');
-
 GLOBAL.Util = require('./util.js');
-GLOBAL.Room = require('./room.js');
-GLOBAL.Mob = require('./mobs.js');
-GLOBAL.Mob = require('./objs.js');
+GLOBAL.Dec = require('./declares.js');
+
+GLOBAL.Rooms = require('./room.js');
+GLOBAL.Mobs = require('./mobs.js');
+GLOBAL.Objs = require('./objs.js');
 
 GLOBAL.database = require('./database.js');
 GLOBAL.sio = require('./socket.js');
@@ -39,21 +40,39 @@ module.exports.cap = String.prototype.cap;
 
 String.prototype.color = function(pre) {
 
-  var str;
-
-  str =  "<span style='color:#fff; white-space:pre-wrap'>" + this;
-
+  var data =  "<span style='color:#fff; white-space:pre-wrap'>" + this;
+makeRandomColor();
 
   do {
-    var pos = str.indexOf("##");
-    var color = str.substr(pos+2,3);
-    //    Util.debug("Pos: " + pos + " Color: " + color);
-    str = str.replace("##"+color, "</span><span style='white-space:pre-wrap; word-wrap: break-word; color:#" + color + ";'>");
-
+    var pos = data.indexOf("##");
+    var color = data.substr(pos+2,3);
+//        Util.debug("Pos: " + pos + " Color: " + color);
+    data = data.replace("##"+color, "</span><span style='white-space:pre-wrap; word-wrap: break-word; color:#" + color + ";'>");
   }
-  while (str.indexOf("##") != -1 );
-  str = str.replace(/(?:\r\n|\r|\n|\n\r)/g, '<br \>');
-  return str + "</span>";
+  while (data.indexOf("##") != -1 );
+
+  data = data.replace(/\{G/g,'</span><span style="color:#55ff55">');
+  data = data.replace(/\{C/g,'</span><span style="color:#55ffff">');
+  data = data.replace(/\{R/g,'</span><span style="color:#ff5555">');
+  data = data.replace(/\{M/g,'</span><span style="color:#ff55ff">');
+  data = data.replace(/\{Y/g,'</span><span style="color:#ffff55">');
+  data = data.replace(/\{W/g,'</span><span style="color:#fff">');
+  data = data.replace(/\{\*/g,'</span><span style="color:'+config.randColor+'">');
+  data = data.replace(/\{X/g,'</span><span style="color:#fff">');
+  data = data.replace(/\{x/g,'</span><span style="color:#fff">');
+  data = data.replace(/\{d/g,'</span><span style="color:#fff">');
+  data = data.replace(/\{b/g,'</span><span style="color:#0000AA">');
+  data = data.replace(/\{g/g,'</span><span style="color:#00AA00">');
+  data = data.replace(/\{c/g,'</span><span style="color:#00AAAA">');
+  data = data.replace(/\{r/g,'</span><span style="color:#AA0000">');
+  data = data.replace(/\{m/g,'</span><span style="color:#AA00AA">');
+  data = data.replace(/\{y/g,'</span><span style="color:#FFAA00">');
+  data = data.replace(/\{w/g,'</span><span style="color:#AAAAAA">');
+  data = data.replace(/\{D/g,'</span><span style="color:#555555">');
+  data = data.replace(/\{B/g,'</span><span style="color:#5555FF">');
+
+  data = data.replace(/(?:\r\n|\r|\n|\n\r)/g, '<br \>');
+  return data + "</span>";
 
 }
 
@@ -159,4 +178,85 @@ String.prototype.variable = function(user, target) {
 
 module.exports.variable = String.prototype.variable;
 
+function Character() {
+  this.name = "";
+  this.short_desc = "";
+  this.long_desc = "";
 
+  this.isnpc = false;
+
+  this.hp = 20;
+  this.maxhp = 20;
+  this.mana = 20;
+  this.maxmana = 20;
+
+  this.room = -1;
+
+  this.level = 1;
+  this.gil = 0;
+  this.exp = 0;
+
+  this.mob = null;
+  this.player = null;
+
+  this.job = 0;
+
+  this.guid = Util.createguid();
+
+  characters[this.guid] = this;
+  //  characters.push(this);
+}
+
+function Room(id) {
+  this.id = id;
+  this.name = "New Room";
+  this.area = "";
+  this.desc = "";
+
+  this.exits = {};
+  this.in_room = [];
+  this.obj_in_room = [];
+}
+
+function Mob(id) {
+  this.index = -1;
+}
+
+function Player(id) {
+  this.socket = null;
+  this.id = null;
+  this.pass = "";
+  this.account = "";
+  this.orig_name = "";
+  this.title = "";
+
+  this.editor = -1;
+  this.edit = -1;
+}
+
+function Socket(sock) {
+  this.socket = sock;
+  this.character = null;
+  this.player = null;
+  this.ip = sock.client.conn.remoteAddress.substr(7);
+  this.id = sock.id;
+  this.state = 0;
+  this.guid = Util.createguid();
+}
+
+module.exports.Room = Room;
+module.exports.Mob = Mob;
+module.exports.Character = Character;
+module.exports.Player = Player;
+module.exports.Socket = Socket;
+
+function makeRandomColor(){
+  config.randColor = '#'+Math.random().toString(16).substr(-6);
+/*
+    var c = '';
+      while (c.length < 7) {
+            c += (Math.random()).toString(16).substr(-6).substr(-1)
+                }
+        config.randColor = "#"+c;
+        */
+}

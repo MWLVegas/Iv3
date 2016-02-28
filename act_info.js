@@ -1,47 +1,51 @@
 Util.info(__filename + " loaded.");
 
-var doWho = function(socket,msg) {
+var doWho = function(character) {
 
-  Util.msg(socket, "<br />##3C3======================", "info");
+  Util.msg(character.player.socket, "<br />##3C3======================", "info");
   var count = 0;
 
   var order = [];
 
-  for ( var x in  player )
+  for ( var x in sockets )
   {
-    if ( player[x].state == 4)
+    if ( sockets[x].state == 4 )
     {
-      order.push(x);
+      order.push( sockets[x].id );
     }
   }
 
-  order.sort( function(b,a) { return player[a].level - player[b].level});
+  order.sort( function(b,a) { return sockets[a].character.level - sockets[b].character.level});
+ // player[a].level - player[b].level});
 
 
   for ( var y in order )
   {
     var x = order[y];
+//    for ( var a in sockets[x].character )
+//    {
+//      Util.debug(a + " : " + sockets[x].character[a]);
+//    }
+
 //    Util.debug("Checking " + x);
-   if ( player[x].state == 4)
-    {
       count++;
       var str = "[%*$-3$ %*$10$] %*".toString();
-      var arr = [ player[x].level, classTable[ player[x].class].name, player[x].name ];
-      Util.msg(socket, str, "info", arr );
-    }
+      var arr = [ sockets[x].character.level, classTable[ sockets[x].character.job].name, sockets[x].character.name ];
+      Util.msg( character.player.socket, str, "info", arr );
   }
-  Util.msg(socket, "<br />##3C3======================", "info");
-  Util.msg(socket, "Players Online: " + count);
+  Util.msg(character.player.socket, "<br />##3C3======================", "info");
+  Util.msg(character.player.socket, "Players Online: " + count);
 
 };
 
-var doLook = function(socket,msg) { 
+var doLook = function(character,msg) { 
 
-  var room = rooms[player[socket.id].room];
+  var room = rooms[character.room];
+  var id = character.room;
 
   if ( room == undefined ) {
-    Util.msg(socket,"An error has occurred.");
-    Util.error("Player reporting room " + player[socket.id].room + " but no room found.");
+//    Util.msg(socket,"An error has occurred.");
+    Util.error("Player reporting room " + character.room + " but no room found.");
     return;
   }
 
@@ -65,13 +69,14 @@ var doLook = function(socket,msg) {
 
   info = info + "] <br /><br />";
 
-  for ( var x in room.players )
+  for ( var x in room.in_room)
   {
-    if ( player[x] && player[x].id != socket.id )
-      info = info + "##CFF&nbsp;&nbsp;&nbsp;&nbsp;"+ player[x].name + " is here. <br />";
+    Util.debug("In Room: " + x + " : " + room.in_room[x].name );
+    if ( character.player != null && character.name != room.in_room[x].name )
+      info = info + "##CFF&nbsp;&nbsp;&nbsp;&nbsp;"+ room.in_room[x].name + " is here. <br />";
   }
 
-  Util.msg(socket,info);
+  Util.msg(character.player.socket,info);
 };
 
 var doWhois = function(socket,msg) {

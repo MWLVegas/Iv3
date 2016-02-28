@@ -5,7 +5,7 @@ body { position: relative; font: 13px "Lucida Console"; background: #000; }
 
 
 form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-input { color:#fff; background:#333; border: 0; padding: 3px; width: 90%;  margin-right: .5%; }
+#m { color:#fff; background:#333; border: 0; padding: 3px; width: 90%;  margin-right: .5%; }
 #scrollLock { color:#fff; background:#333; width:45px; margin-left:-5px;}
 #scrollLabel { color:#FFF; background:#000; width:45px; }
 form button { background: rgb(130, 224, 255); border: none; padding: 3px; }
@@ -14,5 +14,373 @@ form button { background: rgb(130, 224, 255); border: none; padding: 3px; }
 #chatul li { font-family: "Lucida Console", monospace; padding: 3px; background:#000;}
 #chatul li:nth-child(odd) { background: #010101; }
 
+.announce .ui-dialog-titlebar-close { display: none; }
+
+.systemWindow .ui-dialog { background:#000; padding:10px; margin:1px; border-color:#333; }
+.systemWindow .ui-dialog-titlebar-close { display: none; }
+.systemWindow .ui-dialog-titlebar { height:25px; background:#333; border:none; }
+.systemWindow .ui-dialog-title { height:15px; font-size:80% !important; color:#EEE; background:#333; top:1; border:none; }
+.systemWindow .ui-dialog-content { overflow-y:auto; color:#fff; padding:35px;  background:#000; width:100%}
+
+
+#aliasName { background:#ccc; color: #333; border:2px solid #456879;  border-radius:10px; }
+ul { width:"100px"; height:100; list-style-type: none; margin: 0; padding: 0; font-size:80% !important;  font-family: "Lucida Console", Monaco, monospace; background:#000;}
+
+#tabs6 {
+  font: bold 11px/1.5em Verdana;
+  float:left;
+  width:100%;
+  background:change-background;
+  line-height:normal;
+}
+#tabs6 ul {
+  margin:0;
+  padding:10px 10px 0 50px;
+  list-style:none;
+}
+#tabs6 li {
+  display:inline;
+  margin:0;
+  padding:0;
+}
+#tabs6 a {
+  float:left;
+  background:url("images/tableft6.gif") no-repeat left top;
+  margin:0;
+  padding:0 0 0 4px;
+  text-decoration:none;
+}
+#tabs6 a span {
+  float:left;
+  display:block;
+  background:url("images/tabright6.gif") no-repeat right top;
+  padding:5px 15px 4px 6px;
+  color:#FFF;
+}
+/* Commented Backslash Hack hides rule from IE5-Mac \*/
+#tabs6 a span {float:none;}
+/* End IE5-Mac hack */
+#tabs6 a:hover span {
+  color:#FFF;
+}
+#tabs6 a:hover {
+  background-position:0% -42px;
+}
+#tabs6 a:hover span {
+  background-position:100% -42px;
+}
 #error { color:#f00; }
+
+.logonWindow .ui-dialog-titlebar-close {
+  display: none;
+}
+
+.logonWindow .ui-dialog {
+  padding: 10px;
+  margin: 1px;
+  border-color: #333;
+}
+
+.logonWindow .ui-dialog-titlebar {
+  height: 25px;
+  background: #666;
+  border: none;
+}
+
+.logonWindow .ui-dialog-title {
+  height: 15px;
+  font-size: 70% !important;
+  color: #EEE;
+  background: #666;
+  top: 1;
+  border: none;
+}
+
+.logonWindow .ui-dialog-content {
+  overflow-y: auto;
+  padding: 35px;
+  width: 100%
+}
+
+#wait {
+  position: absolute;
+  width: 100%;
+  height: 5000px;
+  opacity: 0.5;
+  background: #000;
+  z-index: 1500;
+  top: 0;
+  left: 0;
+  vertical-align: middle;
+  text-align: center;
+}
+
+#loaddiv {
+  z-Index: 1000;
+  margin: auto;
+  display: table;
+  padding-top: 50px;
+}
+
+.loader {
+  display: table-cell;
+  z-index: 1000;
+  width: 35px;
+  height: 35px;
+  padding: 0px;
+  border-radius: 100%;
+  border: 2px solid;
+  border-top-color: rgba(0, 255, 0, 0.85);
+  border-bottom-color: rgba(0, 255, 0, 0.85);
+  border-left-color: rgba(0, 155, 255, 0.35);
+  border-right-color: rgba(0, 155, 255, 0.35);
+  -webkit-animation: loader 0.8s ease-in-out infinite alternate;
+  animation: loader 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes loader {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes loader {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+
+.stat-bar
+{
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 6px 0;
+  padding: 0;
+  margin: 0;
+
+  display: inline-block;
+  width: 200px;
+  height: 16px;
+
+
+  border: 2px solid #000000;
+  box-shadow: inset 0 0 0 2px #dbd75d;
+}
+
+
+.stat-bar:before
+{
+  content: '';
+  box-sizing: inherit;
+  z-index: -1;
+  position: absolute;
+  top: -8px;
+  width: 16px;
+  height: 28px;
+  background-image: url('http://ivalicemud.com/iv3-image/1.png');
+  background-position: -288px -2px;
+  background-repeat: none;
+}
+
+.stat-bar:after
+{
+  content: '';
+  box-sizing: inherit;
+  z-index: -1;
+
+  position: absolute;
+  top: -8px;
+  right: 0;
+  width: 16px;
+  height: 28px;
+
+  background-image: url('http://ivalicemud.com/iv3-image/1.png');
+  background-position: -304px -2px;
+  background-repeat: none;
+}
+
+
+.health-bar-fluid
+{
+  width: 0%;
+  height: 13px;
+  background: #d33a49; 
+  z-index:10;
+  top: 15;
+  box-shadow: inset 0 3px 0 -1px #d3aa9a, 
+  inset 0 -4px 0 -2px #4d494d, 
+  inset 4px 0 0 -2px #4d494d, 
+  inset -2px 0 0 -2px #4d494d;
+}
+
+.mana-bar-fluid
+{
+  width: 0%;
+  height: 13px;
+  background: #3a49d3; 
+  z-index:10;
+  top: 15;
+  box-shadow: inset 0 3px 0 -1px #d3aa9a, 
+  inset 0 -4px 0 -2px #4d494d, 
+  inset 4px 0 0 -2px #4d494d, 
+  inset -2px 0 0 -2px #4d494d;
+}
+
+
+.settingsWindow .ui-dialog {
+  background: #333;
+  padding: 10px;
+  margin: 1px;
+  border-color: #333;
+}
+
+div #left {
+  padding-right: 5px;
+  border-right: 1px solid;
+  height: 150px;
+  float: left;
+  width: 48%;
+}
+
+div #right {
+  padding-left: 5px;
+  border-left: 1px solid;
+  height: 150px;
+  float: right;
+  width: 48%;
+}
+
+.settingsWindow .ui-dialog-titlebar-close {
+  display: inline;
+}
+
+.settingsWindow .ui-dialog-titlebar {
+  height: 25px;
+  background: #333;
+  border: none;
+}
+
+.settingsWindow .ui-dialog-title {
+  height: 15px;
+  font-size: 60% !important;
+  color: #EEE;
+  background: #333;
+  border: none;
+}
+
+.settingsWindow .ui-dialog-content {
+  font-size: 100%;
+  overflow-y: auto;
+  color: #222;
+  padding: 35px;
+  background: #666;
+  width: 100%
+}
+
+.settingsWindow p {
+  line-height: 2em;
+}
+
+.settingsWindow input {
+  background: #ccc;
+  color: #888;
+  width: 150px;
+  height: 15px;
+  margin: -1px 4px 0 0;
+}
+
+.settingsWindow label {
+  float: left;
+  min-width: 100px;
+  height: 15px;
+}
+
+.settingsWindow .text {
+  float: left;
+  height: 20px;
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+input[type="checkbox"] + label span {
+  display: inline-block;
+  width: 19px;
+  height: 19px;
+  margin: -1px 4px 0 0;
+  padding-top: 5px;
+  vertical-align: middle;
+  background: url("http://ivalicemud.com/iv3-image/radio.png") left top no-repeat;
+}
+
+input[type="checkbox"]:checked + label span {
+  background: url("http://ivalicemud.com/iv3-image/radio.png") -19px top no-repeat;
+}
+
+@-webkit-keyframes pulse {
+  25% {
+    -webkit-transform: scale(1.2);
+    transform: scale(1.2);
+  }
+  75% {
+    -webkit-transform: scale(0.8);
+    transform: scale(0.8);
+  }
+}
+
+@keyframes pulse {
+  25% {
+    -webkit-transform: scale(1.2);
+    -ms-transform: scale(1.2);
+    transform: scale(1.2);
+  }
+  75% {
+    -webkit-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    transform: scale(0.8);
+  }
+}
+
+.pulse {
+  display: inline-block;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+}
+
+.pulse:hover {
+  -webkit-animation-name: pulse;
+  animation-name: pulse;
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-timing-function: linear;
+  animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+}
+
+.grow {
+  -webkit-transition:all 0.5s ease-out;
+  -moz-transition:all 0.5s ease-out;
+  -ms-transition:all 0.5s ease-out;
+  -o-transition:all 0.5s ease-out;
+  transition:all 0.5s ease-out;
+}
+
+.grow:hover {
+  -webkit-transform:scale(1.3);
+  -moz-transform:scale(1.3);
+  -ms-transform:scale(1.3);
+  -o-transform:scale(1.3);
+  transform:scale(1.3);
 

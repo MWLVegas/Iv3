@@ -16,6 +16,7 @@ var checkCommand = function(data, character)
 {
   var orig = data;
 
+  character.player.timeout = 0;
   if ( character == undefined )
   {
     Util.debug("No commands from undf character");
@@ -109,13 +110,18 @@ var doQuit = function (character, msg) {
   save.savePlayer( character ); //player[socket.id]);
   Util.msg(character.player.socket,"Saving!");
   callback(null, callback);
-  sockets[ character.player.id ].state = 0;
+  if ( character.player.socket != null && character.player.socket != undefined )
+    sockets[ character.player.socket.id ].state = 0;
       },
       function(arg, callback) { 
   //  character.removePlayer( player[socket.id] );
   Util.msgroom( character.room, character.name + " slowly fades out of sight.", character.name);
-  character.player.socket.emit("disco","disco");
+  Util.msgall(character.name + " has disconnected.", null, "chat");
+    if ( character.player.socket != null && character.player.socket != undefined )
 
+      character.player.socket.emit("disco","disco");
+
+    Character.removePlayer(character);
 //  character.player.socket.disconnect();
   callback(null,callback) } ], function( err, results) { Util.debug("Player has quit"); });
 
@@ -124,16 +130,16 @@ var doQuit = function (character, msg) {
 };
 
 
-var doSave = function(character) {
+var doSave = function(character, msg) {
   save.savePlayer( character );
   Util.msg(character.player.socket,"Saved!");
 }
 
-var doSocket = function(character) {
+var doSocket = function(character, msg) {
   for ( var x in sockets )
   {
         var str = "[%*$15$] %*$20$ (%*) - %*";
-        var arr = [ sockets[x].ip, sockets[x].player.name, sockets[x].state, sockets[x].id ];
+        var arr = [ sockets[x].ip, sockets[x].character.name, sockets[x].state, sockets[x].id ];
         Util.msg( character.player.socket, str.color(true), "info", arr);
   }
 }
@@ -226,8 +232,22 @@ var doGameinfo = function( character ) {
   info.push("Rooms: " + Object.keys(rooms).length );
   info.push("Mobs: " + mobs.length );
   info.push("Sockets: " + Object.keys(sockets).length );
-  info.push("Players: " + players.length );
-  info.push("Characters: " + characters.length );
+  info.push("Players: " + Object.keys(players).length );
+  info.push("Characters: " + Object.keys(characters).length );
+
+  var a = "Players: ";
+  for ( var x in players ) {
+      a = a + players[x].name + ", ";
+  }
+  info.push(a);
+
+  a = "Characters: ";
+    for ( var x in characters ) {
+            a = a + characters[x].name + ", ";
+              }
+      info.push(a);
+
+
   for ( var x in info )
   {
     Util.msg(character.player.socket,info[x]);
@@ -235,3 +255,4 @@ var doGameinfo = function( character ) {
     
 }
 
+module.exports.doQuit = doQuit;

@@ -79,11 +79,25 @@ var playerToRoom = function(plr, room) {
  async.waterfall([
      function(callback) {
 
-  if ( character.room != -1 )
+  if ( plr.room != -1 && plr.room != undefined )
+  {
+    Util.debug("Char still in room - removing : " + plr.room);
     playerFromRoom(plr);
+  }
 
-  if ( rooms[room].in_room == undefined )
-    rooms[room].in_room = [];
+
+  var err = -1;
+  for ( var x in rooms[room].in_room )
+  {
+    if ( rooms[room].in_room[x].guid == plr.guid )
+    {
+      err= x;
+      Util.error("Player already in this room!");
+      break;
+    }
+  }
+  if ( err != -1 )
+    rooms[room].in_room.splice(err,1);
 
   callback(null,callback);
      },
@@ -121,12 +135,18 @@ var playerFromRoom = function(plr) {
 
   Util.debug( "Room: " + vnum + " ID: " + plr.name + " Players: " + rooms[vnum].in_room);
 
-  var x = rooms[vnum].in_room.indexOf(plr);
-  rooms[vnum].in_room.splice(x,1);
+  for ( var x in rooms[vnum].in_room )
+  {
+  if ( rooms[vnum].in_room[x].guid == plr.guid )
+  {
+      rooms[vnum].in_room.splice(x,1);
+      break;
+  }
+  }
 //  delete rooms[vnum].players[id];
 
   plr.room = -1;
-  Util.debug("Player removed from room.");
+  Util.debug("Player removed from room - Now " + plr.room);
 };
 
 module.exports.loadRooms = loadRooms;

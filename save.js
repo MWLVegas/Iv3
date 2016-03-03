@@ -3,9 +3,16 @@ Util.info(__filename + " loaded.");
 
 var savePlayer = function( character  ) {
 
+  if ( character == undefined || character.player == undefined || character == null || character.player == null )
+  {
+
+    Util.debug("Null character");
+    return;
+  }
+
   Util.debug("savePlayer: " + character.name);
 
-  var id = character.player.socket.id;
+  var id = character.player.id;
 
   var deleted = [];
   var deletedinfo = [];
@@ -38,7 +45,7 @@ var savePlayer = function( character  ) {
 
   deleted = [];
   deletedinfo = [];
-  deleted.push("socket", "character", "id", "state", "pass");//.socket", "player.character", "player");
+  deleted.push("timeout","socket", "character", "id", "state", "pass");//.socket", "player.character", "player");
 
   for ( var x in deleted ) {
     var y = deleted[x];
@@ -135,16 +142,16 @@ var loadPlayer = function( id ) {
             callback(null,callback);
           }], function(err,results) {
           
-            for ( var x in players )
-            {
-              if ( players[x].name == sockets[id].name )
-              {
-                players.splice(x,1);
-                break;
-              }
-            }
+//            for ( var x in players )
+//            {
+//              if ( players[x].name == sockets[id].name )
+//              {
+//                players.splice(x,1);
+//                break;
+//              }
+//            }
 
-            players.push(sockets[id].player);
+//            players.push(sockets[id].player);
 
           } );  
     }

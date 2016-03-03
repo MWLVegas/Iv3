@@ -76,10 +76,10 @@ var canMove = function( character, dir ) {
   async.waterfall([ function(callback) {
     Util.msgroom(vnum, name + " has left " + msg, name);
     Util.msg(character.player.socket,"You leave "+msg);
-    var stuff = Rooms.playerFromRoom( character );
-
-    callback(stuff,callback);
+    Rooms.playerFromRoom( character );
+    callback(null,callback);
   }, function(arg, callback) {
+    Util.debug("Move: Char now in room " + character.room);
     Rooms.playerToRoom( character, toRoom );
     callback(null,callback)
   }], function( err, results ) { 

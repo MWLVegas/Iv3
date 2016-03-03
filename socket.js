@@ -5,8 +5,8 @@ GLOBAL.http = require('http').Server(app);
 GLOBAL.hio = require('socket.io')(http);
 
 GLOBAL.sockets = {};
-GLOBAL.characters = [];
-GLOBAL.players = [];
+GLOBAL.characters = {};
+GLOBAL.players = {};
 GLOBAL.mobs = [];
 
 GLOBAL.port = 6662;
@@ -18,7 +18,7 @@ GLOBAL.listenport = 6661;
 GLOBAL.server = net.createServer( function(c) {
   console.log("Server connceted");
   c.on('end', function() {
-    console.log('server disconnected');
+    console.log('server disco');
   });
   c.pipe(c);
 });
@@ -52,11 +52,15 @@ hio.on('connection', function(socket) {
   sock.character = new includes.Character(socket);
   sock.player = new includes.Player(socket);
 
+  sock.player["id"] = socket.id;
+
   sock.character.player = sock.player;
   sock.character.player["socket"] = socket;
   sock.player.character = sock.character;
 
   sockets[socket.id] = sock;
+  sock.character.guid = sockets[socket.id].guid;
+  sock.player.guid = sock.character.guid;
 
   Util.announce(socket);
 
@@ -182,28 +186,53 @@ hio.on('connection', function(socket) {
 socket.on('error', function (err) {     console.error(err.stack);   });
 socket.on('disconnect', function() {
 
-  for ( var x in sockets ) {  //fix dis
-    if ( sockets[x].socket != socket )
-      continue;
+  var id = socket.id;
+  Util.debug("Disconnecting " + socket.id );
 
-    async.waterfall([
-        function(callback) { 
-          save.savePlayer( sockets[x].character );
-          callback(null,callback);
-        },
-        function(arg1,callback) { 
-          if ( sockets[socket.id].state == 4 )
-          {
-            Util.msgall(sockets[socket.id].name + " has lost connection.",null, "chat");
-          }
-          Util.info("Disconnected: " + sockets[x].name + " - " + sockets[x].ip);
-          callback(null,callback);
+  async.waterfall([
+      function(callback) {
+        save.savePlayer( sockets[id].character );
+        callback(null,callback);
+      },
+      function(arg1,callback) {
+        if ( sockets[id].state == 4 )
+        {
+          Util.msgall(sockets[id].name + " has lost connection.",null, "chat");
+        }
+        delete sockets[id].player["socket"];//.socket;
+        Util.info("Disconnected: " + sockets[id].name + " - " + sockets[id].ip);
+        callback(null,callback);
 
-        } ], function (err, results) { 
-          //Util.debug("Removing " + player[socket.id].name);
-          delete sockets[x];
-        });
-  }
+      } ], function (err, results) {
+        Util.debug("Removing " + sockets[id].name + " : " + sockets[id].id);
+        delete sockets[id];
+      });
+
+
+  /*
+     for ( var x in sockets ) {  //fix dis
+
+     if ( sockets[x].id != socket.id )
+     continue;
+
+     async.waterfall([
+     function(callback) { 
+     save.savePlayer( sockets[x].character );
+     callback(null,callback);
+     },
+     function(arg1,callback) { 
+     if ( sockets[socket.id].state == 4 )
+     {
+     Util.msgall(sockets[socket.id].name + " has lost connection.",null, "chat");
+     }
+     Util.info("Disconnected: " + sockets[x].name + " - " + sockets[x].ip);
+     callback(null,callback);
+
+     } ], function (err, results) { 
+     Util.debug("Removing " + sockets[x].name);
+     delete sockets[x];
+     });
+     } */
 });
 
 socket.on('ping', function() {
@@ -363,34 +392,57 @@ module.exports.state = state;
 
 function loginPlayer( id )
 {
-  //sockets[socket.id].character.name = name.cap();
-Util.debug("LoginPlayer: " + id);
+  Util.debug("LoginPlayer: " + id);
   var found = false;
 
-  save.loadPlayer( id ); 
-  sockets[id].socket.emit('copyoversuccess', sockets[id].name);
+  async.waterfall( [
+      function( callback ) {
+        save.loadPlayer(id);
+        callback(null,callback)
+      },
+      function( arg, callback ) {
+        sockets[id].socket.emit('copyoversuccess', sockets[id].name);
+        callback(null,callback);
+      }, 
+      function ( arg, callback ) {
 
-  for ( var x in characters )
-  {
-    if ( characters[x].name == sockets[id].name ) // Reconnection
-    {
-      characters.splice(x,1);
-      Util.debug("Character found in list- removing");
-      Util.msgall( sockets[id].character.name + " has reconnected.", null, "chat");
-      found = true;
-      break;
-    }
-  }
+        for ( var x in characters )
+        {
+          Util.debug("Checking " + characters[x].guid + " vs " + sockets[id].guid );
+          if ( characters[x].guid == sockets[id].guid ) // Reconnection
+          {
+            Character.removePlayer(characters[x]);
+            Util.debug("Character found in list- removing");
+            found = true;
+          }
+        }
+        callback(null,callback);
+      },
+      function ( arg, callback ) {
 
-  characters.push( sockets[id].character );
 
-  if ( !found )
-  {
-    Util.msgall(sockets[id].name + " has connected.", null, "chat");
-  }
+        if ( !found )
+          Util.msgall(sockets[id].name + " has connected.", null, "chat");
+        else
+          Util.msgall(sockets[id].name + " has reconnected.", null, "chat");
 
-  setTimeout(function() { sio.state( sockets[id].socket,4); act_info.doLook( sockets[id].character,""); },10);
-  Util.debug("Character logged in.");
+        setTimeout(function() { sio.state( sockets[id].socket,4); act_info.doLook( sockets[id].character,""); },10);
+        callback(null, callback);
+      },
+      function ( arg, callback ) {
+                var guid = sockets[id].guid;
+
+        Util.debug("Adding player " + guid + " to lists");
+        //        players.push( sockets[id].player );
+        players[ guid ] = sockets[id].player;
+        characters[ guid ] = sockets[id].character;
+        //        characters.push( sockets[id].character );
+        callback(null,callback);        
+
+      }
+  ], function( err, results ) {
+    Util.debug("Character logged in.");
+  });
 }
 
 

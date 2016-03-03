@@ -4,12 +4,14 @@
     <title>Ivalice 3</title>
     <link rel='shortcut icon' type='image/x-icon' href='http://ivalicemud.com/favicon.png' />
 
-    <link rel="stylesheet" type="text/css" href="http://ivalicemud.com/iv3.css">
+
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script type='text/javascript' src='//cdn.jsdelivr.net/jquery.marquee/1.3.1/jquery.marquee.min.js'></script>
+    <script src="http://rawgithub.com/tobia/Pause/master/jquery.pause.js"></script>
 
     <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/aes.js"></script>
     <script src="http://ivalicemud.com/iv3.js"></script>
@@ -22,6 +24,8 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/1.0.9/cookieconsent.min.js"></script>
     <!-- End Cookie Consent plugin -->
 
+    <link rel="stylesheet" type="text/css" href="http://ivalicemud.com/iv3.css">
+    <link rel="stylesheet" type="text/css" href="http://ivalicemud.com/credits.css">
   </head>
   <body>
     <div id="announce" title="">
@@ -33,19 +37,22 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
       </div>
     </div>
 
+    <div>
+      <span id="tabs6">
+        <li><a class='grow' href="#" title="Aliases" onClick='$("#aliasWindow").dialog("open");'><span>Aliases</span></a></li>
+        <li><a class='grow' href="#" title="Triggers" onClick='doTriggers()'><span>Triggers</span></a></li>
+      </span>
+      <span id="tabs7">
 
+        <li><a class='grow'  href="#" id='credits' title="Credits" onClick='$("#marqueeHolder").dialog("open");'><span>Credits</span></a></li>
+        <li><a class='grow'  href="#" id='settings' title="Settings" onClick='$("#settingsWindow").dialog("open");'><span>Settings</span></a></li>
+
+        <li><a class='grow'  href="#" id='freeze' title="Freeze Windows" onClick='doFreeze()'><span id='freezeText'>Freeze</span></a></li>
+      </span>
+
+    </div>
     <form id="inputform" action="" onsubmit="return doInput(); return false;">
-      <div style='top:-10px; margin:3px'>
-
-        <div id="tabs6">
-          <ul>
-            <li><a class='grow' href="#" title="Aliases" onClick='$("#aliasWindow").dialog("open");'><span>Aliases</span></a></li>
-            <li><a class='grow' href="#" title="Triggers" onClick='doTriggers()'><span>Triggers</span></a></li>
-            <li><a class='grow'  href="#" id='freeze' title="Freeze Windows" onClick='doFreeze()'><span id='freezeText'>Freeze</span></a></li>
-            <li><a class='grow'  href="#" id='settings' title="Settings" onClick='$("#settingsWindow").dialog("open");'><span>Settings</span></a></li>
-
-          </ul>
-        </div>
+      <div style='top:-10px; margin:3px width=100%'>
         <div>
           <div class="stat-bar" id='health'>
             <div class="health-bar-fluid"></div>
@@ -65,17 +72,17 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
               <label for='blink'><span></span>Blink Title when Inactive</label>
               <br/>
               </p>
-               <p>
+              <p>
               <input class='text' id='savecommand' type='checkbox'>
               <label for='savecommand'><span></span>Don't Clear Command Bar</label>
               <br />
               </p>
-               <p>
+              <p>
               <input class='text' id='usekeypad' type='checkbox'>
               <label for='usekeypad'><span></span>Allow keypad movement</label>
               <br />
               </p>
-             <p>
+              <p>
               <div id='fontsize'></div>
               <label for='fontsize' id='font-label'><span></span>Font Size</label>
               </p>
@@ -127,6 +134,48 @@ window.cookieconsent_options = {"message":"This website uses cookies to ensure y
 
 
     </form>
+
+    <div id='marqueeHolder' class="marqueeHolder">
+
+      <div class="marquee">
+        <center>
+          <span class='title'>Iv3<br>
+            <hr width=45%></span>
+
+        <div class='job'>created by</div>
+        <div class='name'>raum</div>
+
+        <div class='job'>graphics</div>
+
+        <center>
+          <div class='block'>
+            Lorc Delapouite Felbrigg<br>
+            JohnRedman CarlOlsen sped<br>
+            PriorBlue Willdabeast VisciousSpeed<br>
+            Lord_Berandas Irongamer HeavenlyDog<br>
+            Lucas Faithtoken
+          </div>
+        </center>
+        <div class='email'>http://game-icons.net</div>
+
+        <div class='job'>Code Consultant / Lead Pain in the Ass</div>
+        <div class='name'>slooker</div>
+        <div class='email'>http://slooker.us</div>
+
+
+        <div class='job'>special thanks</div>
+        <center>
+          <div class='block'>
+            Trell Hydrium Raro Enarei<br>
+          </div>
+        </center>
+        <div class='name'><hr ></div>
+
+        <div class='smblock'>All rights reserved by their respective owners.</div>
+        </center>
+      </div>
+    </div>
+
   </body>
 </html>
 

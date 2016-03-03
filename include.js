@@ -21,7 +21,7 @@ GLOBAL.Objs = require('./objs.js');
 GLOBAL.database = require('./database.js');
 GLOBAL.sio = require('./socket.js');
 GLOBAL.functions = require('./functions.js');
-GLOBAL.character = require('./character.js');
+GLOBAL.Character = require('./character.js');
 GLOBAL.config = require('./config.js');
 GLOBAL.save = require('./save.js');
 
@@ -203,8 +203,8 @@ function Character() {
 
   this.guid = Util.createguid();
 
-  characters[this.guid] = this;
-  //  characters.push(this);
+  // characters[this.guid] = this;
+  // characters.push(this);
 }
 
 function Room(id) {
@@ -222,14 +222,14 @@ function Mob(id) {
   this.index = -1;
 }
 
-function Player(id) {
-  this.socket = null;
-  this.id = null;
+function Player(sock) {
+  this.socket = sock;
+  this.id = sock.id;
   this.pass = "";
   this.account = "";
   this.orig_name = "";
   this.title = "";
-
+  this.timeout = 0;
   this.editor = -1;
   this.edit = -1;
 }
@@ -241,6 +241,7 @@ function Socket(sock) {
   this.ip = sock.client.conn.remoteAddress.substr(7);
   this.id = sock.id;
   this.state = 0;
+  this.name = "";
   this.guid = Util.createguid();
 }
 

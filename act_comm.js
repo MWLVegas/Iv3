@@ -166,7 +166,7 @@ var isSocial = function(msg, character, channel) {
 
                   if ( x == targid ) // The Target
                     channelChat( sockets[x].character, vfound.variable(name, targ, name), channel, "self");
-                  else if ( x= character.player.socket.id ) // Player
+                  else if ( x == character.player.socket.id ) // Player
                     channelChat( sockets[x].character, cfound.variable(name, targ, name), channel, "self");
                   else if ( x != character.player.socket.id && x != targid )
                     channelChat( sockets[x].character, ofound.variable(name, targ, name), channel, "self");

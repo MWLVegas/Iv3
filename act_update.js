@@ -27,12 +27,29 @@ var every_tick = function() {
 };
 
 var every_minute = function() {
+  
+  updateTimers();
 };
 
 var every_second = function() {
   updateClientBars();
 };
 
+
+function updateTimers() {
+
+  for ( var x in players ) {
+    players[x].timeout += 1;
+//    Util.debug("Idle Tiemout: " + players[x].name + " : " + players[x].id);
+//    Util.debug(players[x].timeout + " : " + players[x].character.name);
+    if ( /*players[x].state == 4 && players[x].timeout >= 5 ||*/ ( players[x].socket == undefined && players[x].timeout >= 4 ) ) // LD for too long
+        {
+//          Util.debug("Idle Tiemout: " + players[x].name + " : " + players[x].id);
+
+          functions.doQuit( players[x].character);
+        }
+  }
+}
 
 
 function updateClientBars() {

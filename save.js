@@ -85,7 +85,7 @@ var loadPlayer = function( id ) {
     if ( rows.length == 0 )
     {
       Util.error("Error reading player file for " + sockets[id].name);
-      Util.msg(character.player.socket,"There has been an error reading your player file. Report this to Raum.");
+      Util.msg(sockets[id].socket,"There has been an error reading your player file. Report this to Raum.");
       return;
     }
     for ( var i in rows ) {

@@ -34,7 +34,9 @@ node_modules
 config.js
 node_modules/
 iv3.frame
-iv3.js
 changelog
-iv3.css
 announcement.txt
+copyover.dat
+.gitignore
+*.swp
+logs/

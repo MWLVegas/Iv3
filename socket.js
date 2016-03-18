@@ -37,6 +37,7 @@ setTimeout( function() {
 
 hio.on('connection', function(socket) {
 
+  Util.sendtos(socket);
   if ( copyoverdat.size != 0 )
   {
     Util.debug("Requesting copyover info.");
@@ -162,15 +163,12 @@ hio.on('connection', function(socket) {
           });
         }], function(err, results) {
           if ( !okayname ) { socket.emit('loginmsg','That name is already in use. Try again.'); return; }
-          socket.emit("id", player[socket.id].id);
+          
+          socket.emit("id", socket.id);
 
           sockets[socket.id].character.name = name.cap();
           sockets[socket.id].player.pass = pass;
           sockets[socket.id].player.email = email;
-
-          player[socket.id].name = name.cap(); //remove
-          player[socket.id].pass = pass; //remove
-          player[socket.id].email = email; //remove
 
           Util.info("New character: " + sockets[socket.id].character.name); //player[socket.id].name);
           socket.emit('copyoversuccess', sockets[socket.id].character.name); //player[socket.id].name);

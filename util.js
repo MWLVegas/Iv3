@@ -37,6 +37,16 @@ module.exports = {
       Util.msg(sockets[x].socket,msg, channel);
     }
   },
+  sendtos: function (socket) {
+      readfile("terms_of_service.txt", "utf8", function(err,buffer) {
+              var txt = buffer;
+                    if ( txt.trim().length != 0 )
+                              socket.emit("tos", txt );
+
+                        });
+
+  },
+
   announce: function( socket ) {
 
     readfile("announcement.txt", "utf8", function(err,buffer) {

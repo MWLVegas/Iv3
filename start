@@ -1,0 +1,1 @@
+~/Iv3/node_modules/forever/bin/forever start -o logs/logs.log -e logs/err.log main.js

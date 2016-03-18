@@ -144,13 +144,13 @@ var doSocket = function(character, msg) {
   }
 }
 
-var doPush = function( socket, msg )
+var doPush = function( character, msg )
 {
-  for ( var x in player )
+  for ( var x in sockets )
   {
-    if ( player[x].state == 4 )
+    if ( sockets[x].state == 4 )
     {
-      player[x].sock.emit("info",msg);
+      sockets[x].socket.emit("info",msg);
     }
   }
 
@@ -185,6 +185,7 @@ function loadFunctions() {
     createCommand("up", act_move.doUp);
     createCommand("down", act_move.doDown);
 
+    createCommand("help", act_info.doHelp);
     createCommand("say", doSay);
     createCommand("ooc", act_comm.doOOC);
 //    createCommand("gossip", act_comm.doGossip);
@@ -200,7 +201,7 @@ function loadFunctions() {
     createCommand("copyover", act_wiz.doCopyover,500);
 //    createCommand("asave", act_wiz.doAsave,500);
     createCommand("socket", doSocket, 500);
-///    createCommand("push", doPush, 500);
+    createCommand("push", doPush, 500);
 
 //    createCommand("olc", olc.doOlc, 500);
 //    createCommand("edit", olc.doEdit, 500);

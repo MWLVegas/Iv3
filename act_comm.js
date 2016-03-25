@@ -49,8 +49,8 @@ var doOOC = function(character,msg) {
 
 };
 
-var doGossip = function(socket,msg) { 
-  channelChat( socket, msg,  "##90B(Gossip)##EEE %1: %2");
+var doGossip = function(character,msg) { 
+  channelChat( character, msg,  "##90B(Gossip)##EEE %1: %2");
 }
 
 module.exports.doOOC = doOOC;

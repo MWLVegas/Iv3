@@ -29,8 +29,18 @@ for ( var y in order )
 
   //    Util.debug("Checking " + x);
   count++;
-  var str = "[%*$-3$ %*$10$] %*".toString();
-  var arr = [ sockets[x].character.level, classTable[ sockets[x].character.job].name, sockets[x].character.name ];
+  var str = "[%*$-3$ %*$10$] %*%*".toString();
+  var title = "";
+
+  if ( sockets[x].player.title == undefined )
+    title = "";
+
+  if ( title.substring(0,1) == "'" )
+    title = sockets[x].player.title;
+  else
+    title = " " + sockets[x].player.title;
+
+  var arr = [ sockets[x].character.level, classTable[ sockets[x].character.job].name, sockets[x].character.name, title ];
   Util.msg( character.player.socket, str, "info", arr );
 }
 Util.msg(character.player.socket, "<br />##3C3======================", "info");
@@ -109,34 +119,39 @@ var doHelp = function(character, msg, wildcard) {
 
   if ( msg == undefined || msg.trim().length == 0 )
   {
+    Util.debug("Nothing listed - displaying summary");
     doHelp(character,"summary");
     return;
   }
 
   var query;
   if ( wildcard == true ) {
-     query = "SELECT * FROM help_files WHERE keyword LIKE ?";
+    Util.debug("Changing wildcard query");
+    query = "SELECT * FROM help_files WHERE keyword LIKE ?";
   }
   else
     query = "SELECT * FROM help_files WHERE keyword=?";
   var search = msg;
+  if ( wildcard == true ) 
+    search = "%"+msg+"%";
 
-  db.query(query, wildcard ? [ "%"+msg+"%"] : [ msg ], function ( err, rows, field ) {
-      Util.debug("Checking " + query + " with " + search);
-
+  Util.debug("Query: " + query + " Search: " + search);
+  db.query(query, [ search ], function ( err, rows, field ) {
     if ( err) throw err;
     if ( rows.length == 0 )
     {
       if ( wildcard ) {
-      Util.msg(character.player.socket,"No helpfile was found with that topic.");
+        Util.debug("Nothing found with wildcard");
+        Util.msg(character.player.socket,"No helpfile was found with that topic.");
       }
       else
-      { 
-        Util.debug("No help found: Checking with Wildcard");
+      {
+        Util.debug("Checking wildcard ...");
         doHelp( character,msg,true); 
       }
       return;
     }
+    Util.debug("Something found ...");
     var found = false;
     for ( var i in rows ) {
       var id = rows[i].id;
@@ -150,14 +165,13 @@ var doHelp = function(character, msg, wildcard) {
 
       if ( !found ) { // First helpfile found
         found = true;
-        Util.msg(character.player.socket,"##CFA"+keyword+"<p><hr width=80% />##FFF"+desc+"<p>");
+        Util.msg(character.player.socket,"##CFA"+keyword+"<br /><hr width=80% />##FFF"+desc);
         if ( see_also.trim().length > 0 )
         {
-          Util.msg(character.player.socket,"<br />");
           var see = see_also.split("\n");
           for ( var x in see ) {
 
-            Util.msg(character.player.socket,"##0CCSEE ALSO: " + see[x]);
+            Util.msg(character.player.socket,"<a href='#' onClick='socket.emit(\"input\",userid+\"~help "+see[x]+"\");'>##0CCSEE ALSO: " + see[x]+ "</a>");
           }
         }
         Util.msg(character.player.socket,"<br />");
@@ -165,7 +179,7 @@ var doHelp = function(character, msg, wildcard) {
       }
       else // already displayed a helpfile
       {
-        Util.msg(character.player.socket,"##05AAdditional Help Found: " + keyword);
+        Util.msg(character.player.socket,"<a href='#' onClick='socket.emit(\"input\",userid+\"~help "+keyword+"\");'>##05AAdditional Help Found: " + keyword + "</a>");
       }
     }
 
@@ -177,7 +191,27 @@ var doHelp = function(character, msg, wildcard) {
   });
 }
 
+var doTitle = function( character, msg ) {
+
+  if ( msg == undefined || msg.trim().length == 0 )
+  {
+    Util.msg(character,"Set your title to what?");
+    return;
+  }
+
+  if ( msg.trim().length > 50 )
+    msg = msg.trim().substring(0,50);
+  else
+    msg = msg.trim();
+
+  character.player.title = msg;
+  Util.msg(character,"Title set.");
+
+
+}
+
 module.exports.doHelp = doHelp;
 module.exports.doWho = doWho;
 module.exports.doLook = doLook;
 module.exports.doWhois = doWhois;
+module.exports.doTitle = doTitle;

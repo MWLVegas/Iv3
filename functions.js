@@ -188,24 +188,25 @@ function loadFunctions() {
     createCommand("help", act_info.doHelp);
     createCommand("say", doSay);
     createCommand("ooc", act_comm.doOOC);
-//    createCommand("gossip", act_comm.doGossip);
+    createCommand("gossip", act_comm.doGossip);
 
     createCommand("look", act_info.doLook);
     createCommand("whois", act_info.doWhois);
 
 
+    createCommand("title", act_info.doTitle);
     createCommand("who", act_info.doWho);
     createCommand("quit", doQuit);
 
     createCommand("gameinfo", doGameinfo);
     createCommand("copyover", act_wiz.doCopyover,500);
-//    createCommand("asave", act_wiz.doAsave,500);
+    createCommand("asave", act_wiz.doAsave,500);
     createCommand("socket", doSocket, 500);
     createCommand("push", doPush, 500);
 
-//    createCommand("olc", olc.doOlc, 500);
-//    createCommand("edit", olc.doEdit, 500);
-//    createCommand("done", olc.doDone, 500);
+    createCommand("olc", olc.doOlc, 500);
+    createCommand("edit", olc.doEdit, 500);
+    createCommand("done", olc.doDone, 500);
 
     createCommand("save", doSave);
 

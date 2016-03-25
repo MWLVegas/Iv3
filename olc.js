@@ -5,14 +5,18 @@ var room_table = [];
 var mob_table = [];
 var obj_table = [];
 
-var doDone = function( socket, data ) {
-  player[socket.id].editor = -1;
-  player[socket.id].edit = -1;
-  Util.msg(socket,"Exiting Editor");
+var doDone = function( character, data ) {
+  character.player.editor = -1;
+  character.player.edit = -1;
+  Util.msg(character.player.socket,"Exiting Editor");
 }
 module.exports.doDone = doDone;
 
-var doEdit = function(socket,data ) {
+var doEdit = function(character,data ) {
+
+  var socket = character.player.socket;
+  var player = character.player;
+
   if ( data.indexOf(" ") == -1 )
     cmd = data.toString().trim();
   else
@@ -30,9 +34,9 @@ var doEdit = function(socket,data ) {
   switch( cmd.toLowerCase() )
   {
     default: Util.msg(socket,"Invalid editor."); return;
-    case "room": player[socket.id].editor = 0; break;
-    case "mob": player[socket.id].editor = 1; break;
-    case "obj": player[socket.id].editor = 2; break;
+    case "room": player.editor = 0; break;
+    case "mob": player.editor = 1; break;
+    case "obj": player.editor = 2; break;
   }
 
   if ( data.startsWith("create") )
@@ -45,30 +49,30 @@ var doEdit = function(socket,data ) {
     }
 
     num = Number(split[1]);
-    if (  olc_edittable[player[socket.id].editor].list[num] )
+    if (  olc_edittable[player.editor].list[num] )
     {
-      Util.msg(socket,"That "+ olc_edittable[player[socket.id].editor].name+" ID already exists.");
+      Util.msg(socket,"That "+ olc_edittable[player.editor].name+" ID already exists.");
       return;
     }
 
 
-    if ( player[socket.id].editor == 0 )  // Room Editor 
-         createRoom(num);
-    else if ( player[socket.id].editor == 1 )
+    if ( player.editor == 0 )  // Room Editor 
+      createRoom(num);
+    else if ( player.editor == 1 )
       createMob(num);
-    else if ( player[socket.id].editor == 2 )
+    else if ( player.editor == 2 )
       createObj(num);
 
-    Util.msg(socket, olc_edittable[player[socket.id].editor].name + " ID # " + num + " created.");
+    Util.msg(socket, olc_edittable[player.editor].name + " ID # " + num + " created.");
     data = num;
   }
 
   if ( data.length == 0 )
-    data = player[socket.id].room;
-    
+    data = character.room;
 
-  player[socket.id].edit = Number(data);
-  Util.msg(socket,"Entering " + olc_edittable[player[socket.id].editor].name + " editor: ID: " + player[socket.id].edit);
+
+  player.edit = Number(data);
+  Util.msg(socket,"Entering " + olc_edittable[player.editor].name + " editor: ID: " + player.edit);
   return;
 }
 
@@ -81,7 +85,7 @@ var olc_edittable = [];
 
 olc_edittable.push(room,mob,obj);
 
-Util.debug( olc_edittable );
+//Util.debug( olc_edittable );
 olc_edittable[room.num] = room;
 olc_edittable[mob.num] = mob;
 olc_edittable[obj.num] = obj;
@@ -105,7 +109,7 @@ var doOlc = function(character, data) {
     return;
   }
 
-  Util.debug("Character: " + character.name + " Editor: " + character.player.editor );
+  //  Util.debug("Character: " + character.name + " Editor: " + character.player.editor );
 
   var editor = character.player.editor;
   var table = olc_edittable[editor].table;
@@ -121,29 +125,29 @@ var doOlc = function(character, data) {
   }
   // Not OLC - Check regular commands
 
-    if ( functions.commandList[cmd] )
+  if ( functions.commandList[cmd] )
+  {
+    if ( character.level < functions.commandList[cmd].level )
     {
-      if ( character.level < functions.commandList[cmd].level )
-      {
-        Util.msg(character.player.socket,functions.invalid);
-        return;
-      }
-      functions.commandList[cmd].funct(character, data);
+      Util.msg(character.player.socket,functions.invalid);
       return;
     }
-    if ( functions.aliasList[cmd] )
-    {
-      functions.checkCommand(functions.aliasList[cmd].alias + " " + data, character);
-      return;
-    }
-
-    Util.msg(character.player.socket,functions.invalid);
+    functions.commandList[cmd].funct(character, data);
     return;
+  }
+  if ( functions.aliasList[cmd] )
+  {
+    functions.checkCommand(functions.aliasList[cmd].alias + " " + data, character);
+    return;
+  }
+
+  Util.msg(character.player.socket,functions.invalid);
+  return;
 
 };
 
 var doRoomDesc = function(socket, data) {
-  var room =  player[socket.id].edit;
+  var room =  sockets[socket.id].player.edit;
   rooms[room].desc = data;
   Util.msg(socket,"Description updated.");
 };
@@ -347,11 +351,31 @@ var doRoomCreate = function(socket, data ) {
   });
 };
 
+var createMob = function( vnum ) {
+  async.waterfall([
+      function(callback) { 
+        //        rooms[vnum]= new Room.newRoom(vnum);
+        mobs[vnum] = new includes.Mob(vnum);
+        callback(null, callback);
+      }, function(arg1, callback ) {
+        Util.debug("Should be true: " + mobs[vnum]);
+        mobs[vnum].vnum = vnum;
+        mobs[vnum].area = getAreaName(vnum);
+        callback(null,callback);
+      }], function(err, results) 
+      {
+        Util.debug("Mob should have created");
+      });
+
+
+}
+
+
 var createRoom = function( vnum ) {
   async.waterfall([
       function(callback) { 
-        rooms[vnum]= new Room.newRoom(vnum);
-
+        //        rooms[vnum]= new Room.newRoom(vnum);
+        rooms[vnum] = new includes.Room(vnum);
         callback(null, callback);
       }, function(arg1, callback ) {
         Util.debug("Should be true: " + rooms[vnum]);

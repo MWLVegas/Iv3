@@ -37,6 +37,7 @@ iv3.frame
 changelog
 announcement.txt
 copyover.dat
+terms_of_service.txt
 .gitignore
 *.swp
 logs/

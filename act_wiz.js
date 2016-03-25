@@ -74,7 +74,7 @@ var doAsave = function(socket,msg) {
         Util.info("Saving rooms.");
         for ( var x in rooms )
         {
-          Room.saveRoom(x);
+          Rooms.saveRoom(x);
           Util.debug("Saved Room " + x);
         }
 

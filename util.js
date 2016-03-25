@@ -131,6 +131,16 @@ module.exports = {
         msg=  msg.replace('%*', args[x]);
     }
     msg = msg.color();
+
+    if ( socket == undefined )
+    {
+      Util.debug("Trying to send message to Undefined: " + msg);
+      return;
+    }
+
+    if ( socket.player != undefined )
+      socket = socket.player["socket"];
+
     if ( socket != undefined )
     {
       if ( chan && chan != null )

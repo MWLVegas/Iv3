@@ -169,6 +169,7 @@ hio.on('connection', function(socket) {
           sockets[socket.id].character.name = name.cap();
           sockets[socket.id].player.pass = pass;
           sockets[socket.id].player.email = email;
+          sockets[socket.id].name = name.cap();
 
           Util.info("New character: " + sockets[socket.id].character.name); //player[socket.id].name);
           socket.emit('copyoversuccess', sockets[socket.id].character.name); //player[socket.id].name);
@@ -176,6 +177,7 @@ hio.on('connection', function(socket) {
           var query = "INSERT INTO players SET ?;";
           db.query(query,post);
           Util.msg(socket,"Welcome aboard!");
+          sockets[socket.id].noob = true;
           loginPlayer( socket.id );
   });
 });
@@ -293,7 +295,7 @@ socket.on('input',function(data) {
   var user = data.substr(0,data.indexOf("~"));
   var msg  = data.substr(user.length+1).trim();
   var pass = "";
-  //    Util.debug("User: " + user + " Msg: " + msg);
+      Util.debug("User: " + user + " Msg: " + msg);
   //
 
   if ( sockets[socket.id].state != 4 )
@@ -395,7 +397,14 @@ function loginPlayer( id )
 
   async.waterfall( [
       function( callback ) {
+        if ( sockets[id].noob )
+        {
+          save.savePlayer(sockets[id].character);
+        }
+        else
+        {
         save.loadPlayer(id);
+        }
         callback(null,callback)
       },
       function( arg, callback ) {
@@ -419,8 +428,16 @@ function loginPlayer( id )
       function ( arg, callback ) {
 
 
-        if ( !found )
+        if ( !found ) {
+          if ( sockets[id].noob )
+          {
+            Util.msgall(sockets[id].name + " has begun adventuring on Iv3!", null, "chat");
+          }
+          else
+          {
           Util.msgall(sockets[id].name + " has connected.", null, "chat");
+          }
+        }
         else
           Util.msgall(sockets[id].name + " has reconnected.", null, "chat");
 

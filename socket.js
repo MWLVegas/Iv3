@@ -64,7 +64,9 @@ hio.on('connection', function(socket) {
   sock.player.guid = sock.character.guid;
 
   Util.announce(socket);
-
+  socket.on('changelog', function(msg) {
+    Util.sendchanges(socket);
+  });
   socket.on('nocopyover', function(msg) { 
     Util.debug("No copyover info: Sending greeting");
     socket.emit('info',config.greeting.color(true));

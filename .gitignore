@@ -38,6 +38,7 @@ changelog
 announcement.txt
 copyover.dat
 terms_of_service.txt
+changelog.txt
 .gitignore
 *.swp
 logs/

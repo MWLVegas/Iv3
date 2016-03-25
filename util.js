@@ -38,14 +38,23 @@ module.exports = {
     }
   },
   sendtos: function (socket) {
-      readfile("terms_of_service.txt", "utf8", function(err,buffer) {
-              var txt = buffer;
-                    if ( txt.trim().length != 0 )
-                              socket.emit("tos", txt );
+    readfile("terms_of_service.txt", "utf8", function(err,buffer) {
+      var txt = buffer;
+      if ( txt.trim().length != 0 )
+        socket.emit("tos", txt );
 
-                        });
+    });
 
   },
+  sendchanges: function (socket) {
+        readfile("changes.txt", "utf8", function(err,buffer) {
+                var txt = buffer;
+                      if ( txt.trim().length != 0 )
+                                socket.emit("changelog", txt );
+
+                          });
+
+          },
 
   announce: function( socket ) {
 
@@ -175,10 +184,10 @@ module.exports = {
         .toString(16)
         .substring(1);
     }
-   var guid = s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    var guid = s4() + s4() + '-' + s4() + '-' + s4() + '-' +
       s4() + '-' + s4() + s4() + s4();
-//   Util.debug("Guid Generated: " + guid);
-   return guid;
+    //   Util.debug("Guid Generated: " + guid);
+    return guid;
   }
 
 
